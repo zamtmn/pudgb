@@ -152,7 +152,7 @@ begin
    //register TProjectOptions in zscript unit
    RunTimeUnit^.RegisterType(TypeInfo(TProjectOptions));
    //Set params names
-   RunTimeUnit^.SetTypeDesk(TypeInfo(TProgPaths),['PathToDot','Temp']);
+   RunTimeUnit^.SetTypeDesk(TypeInfo(TProgPaths),['PathToDot','PathToLazConfig','Temp']);
    RunTimeUnit^.SetTypeDesk(TypeInfo(TBehavior),['AutoSelectPages:','AutoClearPages']);
 
    RunTimeUnit^.SetTypeDesk(TypeInfo(TProjectOptions),['Paths','Parser options','Graph bulding','Log']);
@@ -216,7 +216,7 @@ begin
    od.FilterIndex := 1;
    if od.Execute then
    begin
-     LPIImport(Options.ProjectOptions,od.FileName,DummyWriteToLog);
+     LPIImport(Options,od.FileName,DummyWriteToLog);
    end;
    od.Free;
    _SetUIFromOption(nil);

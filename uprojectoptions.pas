@@ -101,8 +101,8 @@ begin
  result.GraphBulding.FullG.CalcEdgesWeight:=true;
  result.GraphBulding.Circ.CalcEdgesWeight:=false;
 
- result.GraphBulding.FullG.SourceUnit:='uzeentity';
- result.GraphBulding.FullG.DestUnit:='uzeenttext';
+ //result.GraphBulding.FullG.SourceUnit:='uzeentity';
+ //result.GraphBulding.FullG.DestUnit:='uzeenttext';
 end;
 
 end.
