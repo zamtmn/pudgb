@@ -132,6 +132,13 @@ begin
    UnitsFormat:=CreateDefaultUnitsFormat;
    INTFObjInspShowOnlyHotFastEditors:=false;
 
+   with TComboBox.Create(NIL) do begin
+     ParentWindow:=self.Handle;
+     Hide;
+     Application.ProcessMessages;
+     INTFDefaultControlHeight:=Height;
+   end;
+
    RunTimeUnit:=units.CreateUnit('',nil,'RunTimeUnit');//create empty zscript unit
 
    //register TProgramOptions in zscript unit
@@ -139,6 +146,11 @@ begin
 
    //setup default ProgramOptions
    Options.ProgramOptions.ProgPaths._PathToDot:='E:\Program Files (x86)\Graphviz2.38\bin\dot.exe';
+{$ifdef windows}
+   Options.ProgramOptions.ProgPaths._PathToLazarusConf:=GetEnvironmentVariable('LOCALAPPDATA')+'\lazarus';
+{$elseif}
+   Options.ProgramOptions.ProgPaths._PathToLazarusConf:='~/.lazarus';
+{$endif}
    Options.ProgramOptions.ProgPaths._Temp:=GetTempDir;
    Options.ProgramOptions.Behavior.AutoClearPages:=true;
    Options.ProgramOptions.Behavior.AutoSelectPages:=true;
