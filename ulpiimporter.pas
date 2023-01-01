@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils,Laz2_XMLCfg,LazUTF8,
   uprojectoptions,uoptions,ufileutils,LazFileUtils,Laz2_DOM,
-  MacroIntf,TransferMacros,MacroDefIntf;//From lazarus ide
+  MacroIntf,TransferMacrosIntf,TransferMacros,MacroDefIntf;//From lazarus ide
 
 type
   TMacroMethods=class
@@ -121,7 +121,8 @@ var
  cd:ansistring;
 begin
  IDEMacros:=TLazIDEMacros.Create;
- GlobalMacroList:=TTransferMacroList.Create;
+ TransferMacrosIntf.GlobalMacroList:=TTransferMacroList.Create;
+ //GlobalMacroList:=TTransferMacroList.Create;
  tmm:=TMacroMethods.create(Options);
  //tmm.Options:=Options;
  GlobalMacroList.Add(TTransferMacro.Create('TargetCPU','',

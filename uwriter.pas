@@ -99,6 +99,7 @@ begin
     connected:=false;
     for i:=0 to _SourceUnitIndex.Size-1 do
     begin
+     //ScanResult.UnitInfoArray[i].;
      j:=ScanResult.G.FindMinPathDirected(ScanResult.G.Vertices[index],ScanResult.G.Vertices[_SourceUnitIndex[i]],nil);
      if ScanResult.G.FindMinPathDirected(ScanResult.G.Vertices[index],ScanResult.G.Vertices[_SourceUnitIndex[i]],nil)>=0 then
      begin
@@ -188,24 +189,24 @@ begin
   SourceUnitIndexs:=nil;
   DestUnitIndexs:=nil;
 
-  if Options.GraphBulding.FullG.SourceUnit<>'' then
+  if Options.GraphBulding.FullG.DstUnit<>'' then
   begin
     SourceUnitIndexs:=TNodeIndexes.create;
     for i:=0 to ScanResult.UnitInfoArray.Size-1 do
       if CheckIncludeOptions(Options,ScanResult.UnitInfoArray.mutable[i]^.UnitName)=ITG_Include then
-         if MatchesMaskList(ScanResult.UnitInfoArray.mutable[i]^.UnitName,Options.GraphBulding.FullG.SourceUnit) then
+         if MatchesMaskList(ScanResult.UnitInfoArray.mutable[i]^.UnitName,Options.GraphBulding.FullG.DstUnit) then
            SourceUnitIndexs.PushBack(i);
 
     if SourceUnitIndexs.size<=0 then
       Application.MessageBox('Source unit not found in graph','Error!');
   end;
 
-  if Options.GraphBulding.FullG.DestUnit<>'' then
+  if Options.GraphBulding.FullG.SrcUnit<>'' then
   begin
     DestUnitIndexs:=TNodeIndexes.create;
     for i:=0 to ScanResult.UnitInfoArray.Size-1 do
       if CheckIncludeOptions(Options,ScanResult.UnitInfoArray.mutable[i]^.UnitName)=ITG_Include then
-         if MatchesMaskList(ScanResult.UnitInfoArray.mutable[i]^.UnitName,Options.GraphBulding.FullG.DestUnit) then
+         if MatchesMaskList(ScanResult.UnitInfoArray.mutable[i]^.UnitName,Options.GraphBulding.FullG.SrcUnit) then
            DestUnitIndexs.PushBack(i);
 
     if DestUnitIndexs.size<=0 then
@@ -381,8 +382,10 @@ begin
 
     if Options.GraphBulding.PathClusters then
     begin
-     Clusters.Free;
-     ClusterInfo.Free
+      if assigned(Clusters)then
+        Clusters.Free;
+      if assigned(ClusterInfo)then
+        ClusterInfo.Free
     end;
 
     end;

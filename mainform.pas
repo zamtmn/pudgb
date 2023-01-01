@@ -181,7 +181,7 @@ begin
    RunTimeUnit^.SetTypeDesk(TypeInfo(TFullG),['Include not founded units','Include interface uses',
                                               'Include implementation uses','Only looped edges',
                                               'Include to graph','Exclude from graph',
-                                              'Source unit','Dest unit','Calc edges weight']);
+                                              'Dest unit','Source unit','Calc edges weight']);
 
    RunTimeUnit^.SetTypeDesk(TypeInfo(TEdgeType),['Continuous','Dotted']);
 
@@ -197,7 +197,7 @@ begin
    AddEditorToType(RunTimeUnit^.TypeName2PTD('Double'),TBaseTypesEditors.BaseCreateEditor);//register standart editor to double type
    AddEditorToType(RunTimeUnit^.TypeName2PTD('AnsiString'),TBaseTypesEditors.BaseCreateEditor);//register standart editor to string type
    AddEditorToType(RunTimeUnit^.TypeName2PTD('String'),TBaseTypesEditors.BaseCreateEditor);//register standart editor to string type
-   AddEditorToType(RunTimeUnit^.TypeName2PTD('Boolean'),TBaseTypesEditors.GDBBooleanCreateEditor);//register standart editor to string type
+   AddEditorToType(RunTimeUnit^.TypeName2PTD('Boolean'),TBaseTypesEditors.BooleanCreateEditor);//register standart editor to string type
    AddFastEditorToType(RunTimeUnit^.TypeName2PTD('Boolean'),@OIUI_FE_BooleanGetPrefferedSize,@OIUI_FE_BooleanDraw,@OIUI_FE_BooleanInverse);
    EnumGlobalEditor:=TBaseTypesEditors.EnumDescriptorCreateEditor;//register standart editor to all enum types
 

@@ -27,8 +27,8 @@ type
     IncludeOnlyLoops:Boolean;
     IncludeToGraph:string;
     ExcludeFromGraph:string;
-    SourceUnit:string;
-    DestUnit:string;
+    DstUnit:string;
+    SrcUnit:string;
     CalcEdgesWeight:Boolean;
   end;
   TEdgeType=(ETContinuous,ETDotted);
@@ -101,8 +101,8 @@ begin
  result.GraphBulding.FullG.CalcEdgesWeight:=true;
  result.GraphBulding.Circ.CalcEdgesWeight:=false;
 
- //result.GraphBulding.FullG.SourceUnit:='uzeentity';
- //result.GraphBulding.FullG.DestUnit:='uzeenttext';
+ //result.GraphBulding.FullG.DstUnit:='uzeentity';
+ //result.GraphBulding.FullG.SrcUnit:='uzeenttext';
 end;
 
 end.
