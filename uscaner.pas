@@ -139,7 +139,7 @@ begin
        E.uname:=E.uname;
      E.LogWriter:=LogWriter;
      PrepareModule(M,TPasTreeContainer(E),Options,ScanResult,LogWriter);
-     if assigned(M) then M.Release;
+     if assigned(M) then M.Destroy;
      if assigned(E) then E.Free;
    except
      on excep:EParserError do

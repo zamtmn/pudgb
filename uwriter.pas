@@ -24,7 +24,7 @@ type
 
 procedure WriteGraph(Options:TProjectOptions;ScanResult:TScanResult;const LogWriter:TLogWriter);
 procedure ProcessNode(_SourceUnitIndex,_DestUnitIndex:TNodeIndexes;Options:TProjectOptions;ScanResult:TScanResult;var Node:TUnitInfo;const index:integer;const LogWriter:TLogWriter;const LogOpt:TLogOpt;ForceInclude:boolean=false);
-function IncludeToGraph(_SourceUnitIndex,_DestUnitIndex:TNodeIndexes;const Options:TProjectOptions;const ScanResult:TScanResult;var Node:TUnitInfo;const index:integer;const LogWriter:TLogWriter):boolean;
+function IncludeToGraph(_DstUnitIndex,_SrcUnitIndex:TNodeIndexes;const Options:TProjectOptions;const ScanResult:TScanResult;var Node:TUnitInfo;const index:integer;const LogWriter:TLogWriter):boolean;
 function getDecoratedUnnitname(const UI:TUnitInfo;DecoratedUnitNameMode:TDecoratedUnitNameModeSet=[TDUNM_AddUsesCount]):string;
 
 implementation
@@ -80,7 +80,7 @@ begin
       end;
 end;
 
-function IncludeToGraph(_SourceUnitIndex,_DestUnitIndex:TNodeIndexes;const Options:TProjectOptions;const ScanResult:TScanResult;var Node:TUnitInfo;const index:integer;const LogWriter:TLogWriter):boolean;
+function IncludeToGraph(_DstUnitIndex,_SrcUnitIndex:TNodeIndexes;const Options:TProjectOptions;const ScanResult:TScanResult;var Node:TUnitInfo;const index:integer;const LogWriter:TLogWriter):boolean;
 var
   i,j:integer;
   connected:boolean;
@@ -93,15 +93,15 @@ begin
   if node.UnitName='uzestrconsts' then
                                       Node:=Node;
   connected:=true;
-  if assigned(_SourceUnitIndex) then
-  if _SourceUnitIndex.Size>0 then
+  if assigned(_DstUnitIndex) then
+  if _DstUnitIndex.Size>0 then
   begin
     connected:=false;
-    for i:=0 to _SourceUnitIndex.Size-1 do
+    for i:=0 to _DstUnitIndex.Size-1 do
     begin
      //ScanResult.UnitInfoArray[i].;
-     j:=ScanResult.G.FindMinPathDirected(ScanResult.G.Vertices[index],ScanResult.G.Vertices[_SourceUnitIndex[i]],nil);
-     if ScanResult.G.FindMinPathDirected(ScanResult.G.Vertices[index],ScanResult.G.Vertices[_SourceUnitIndex[i]],nil)>=0 then
+     j:=ScanResult.G.FindMinPathDirected(ScanResult.G.Vertices[index],ScanResult.G.Vertices[_DstUnitIndex[i]],nil);
+     if ScanResult.G.FindMinPathDirected(ScanResult.G.Vertices[index],ScanResult.G.Vertices[_DstUnitIndex[i]],nil)>=0 then
      begin
       connected:=true;
       break;
@@ -109,14 +109,14 @@ begin
     end;
     if not connected then exit;
   end;
-  if assigned(_DestUnitIndex) then
-  if _DestUnitIndex.Size>0 then
+  if assigned(_SrcUnitIndex) then
+  if _SrcUnitIndex.Size>0 then
   begin
     connected:=false;
-    for i:=0 to _DestUnitIndex.Size-1 do
+    for i:=0 to _SrcUnitIndex.Size-1 do
     begin
-     j:=ScanResult.G.FindMinPathDirected(ScanResult.G.Vertices[_DestUnitIndex[i]],ScanResult.G.Vertices[index],nil);
-     if ScanResult.G.FindMinPathDirected(ScanResult.G.Vertices[_DestUnitIndex[i]],ScanResult.G.Vertices[index],nil)>=0 then
+     j:=ScanResult.G.FindMinPathDirected(ScanResult.G.Vertices[_SrcUnitIndex[i]],ScanResult.G.Vertices[index],nil);
+     if ScanResult.G.FindMinPathDirected(ScanResult.G.Vertices[_SrcUnitIndex[i]],ScanResult.G.Vertices[index],nil)>=0 then
      begin
       connected:=true;
       break;
@@ -127,11 +127,11 @@ begin
     result:=true;
 end;
 
-procedure CheckNode(_SourceUnitIndex,_DestUnitIndex:TNodeIndexes;Options:TProjectOptions;ScanResult:TScanResult;var Node:TUnitInfo;const index:integer;const LogWriter:TLogWriter;const LogOpt:TLogOpt;ForceInclude:boolean=false);
+procedure CheckNode(_DstUnitIndex,_SrctUnitIndex:TNodeIndexes;Options:TProjectOptions;ScanResult:TScanResult;var Node:TUnitInfo;const index:integer;const LogWriter:TLogWriter;const LogOpt:TLogOpt;ForceInclude:boolean=false);
 begin
   if node.NodeState=NSNotCheced then
   begin
-    if ForceInclude or IncludeToGraph(_SourceUnitIndex,_DestUnitIndex,Options,ScanResult,Node,index,LogWriter)then
+    if ForceInclude or IncludeToGraph(_DstUnitIndex,_SrctUnitIndex,Options,ScanResult,Node,index,LogWriter)then
         node.NodeState:=NSChecedNotWrited
     else
         node.NodeState:=NSFiltredOut;
@@ -182,34 +182,34 @@ var
   Clusters:TClusters;
   ClusterInfo:TClusterInfo;
   ClusterInfoPair:TClusterInfoPair;
-  SourceUnitIndexs,DestUnitIndexs:TNodeIndexes;
+  DstUnitIndexs,SrcUnitIndexs:TNodeIndexes;
   LC:TLinkCounter;
   LCP:TLinkCounterPair;
 begin
-  SourceUnitIndexs:=nil;
-  DestUnitIndexs:=nil;
+  DstUnitIndexs:=nil;
+  SrcUnitIndexs:=nil;
 
   if Options.GraphBulding.FullG.DstUnit<>'' then
   begin
-    SourceUnitIndexs:=TNodeIndexes.create;
+    DstUnitIndexs:=TNodeIndexes.create;
     for i:=0 to ScanResult.UnitInfoArray.Size-1 do
       if CheckIncludeOptions(Options,ScanResult.UnitInfoArray.mutable[i]^.UnitName)=ITG_Include then
          if MatchesMaskList(ScanResult.UnitInfoArray.mutable[i]^.UnitName,Options.GraphBulding.FullG.DstUnit) then
-           SourceUnitIndexs.PushBack(i);
+           DstUnitIndexs.PushBack(i);
 
-    if SourceUnitIndexs.size<=0 then
+    if DstUnitIndexs.size<=0 then
       Application.MessageBox('Source unit not found in graph','Error!');
   end;
 
   if Options.GraphBulding.FullG.SrcUnit<>'' then
   begin
-    DestUnitIndexs:=TNodeIndexes.create;
+    SrcUnitIndexs:=TNodeIndexes.create;
     for i:=0 to ScanResult.UnitInfoArray.Size-1 do
       if CheckIncludeOptions(Options,ScanResult.UnitInfoArray.mutable[i]^.UnitName)=ITG_Include then
          if MatchesMaskList(ScanResult.UnitInfoArray.mutable[i]^.UnitName,Options.GraphBulding.FullG.SrcUnit) then
-           DestUnitIndexs.PushBack(i);
+           SrcUnitIndexs.PushBack(i);
 
-    if DestUnitIndexs.size<=0 then
+    if SrcUnitIndexs.size<=0 then
       Application.MessageBox('Destination unit not found in graph','Error!');
   end;
 
@@ -221,7 +221,7 @@ begin
       for i:=0 to ScanResult.UnitInfoArray.Size-1 do
       begin
        ScanResult.UnitInfoArray.mutable[i]^.NodeState:=NSNotCheced;
-       CheckNode(SourceUnitIndexs,DestUnitIndexs,Options,ScanResult,ScanResult.UnitInfoArray.Mutable[i]^,i,LogWriter,[LD_FullGraph]);
+       CheckNode(DstUnitIndexs,SrcUnitIndexs,Options,ScanResult,ScanResult.UnitInfoArray.Mutable[i]^,i,LogWriter,[LD_FullGraph]);
       end;
 
       if Options.GraphBulding.PathClusters then
@@ -282,11 +282,11 @@ begin
     begin
      if ScanResult.UnitInfoArray[i].InterfaceUses.Size>0 then
      begin
-       ProcessNode(SourceUnitIndexs,DestUnitIndexs,Options,ScanResult,ScanResult.UnitInfoArray.Mutable[i]^,i,LogWriter,[LD_FullGraph]);
+       ProcessNode(DstUnitIndexs,SrcUnitIndexs,Options,ScanResult,ScanResult.UnitInfoArray.Mutable[i]^,i,LogWriter,[LD_FullGraph]);
        if ScanResult.UnitInfoArray[i].NodeState<>NSFiltredOut then
        for j:=0 to ScanResult.UnitInfoArray[i].InterfaceUses.Size-1 do
        begin
-         ProcessNode(SourceUnitIndexs,DestUnitIndexs,Options,ScanResult,ScanResult.UnitInfoArray.Mutable[ScanResult.UnitInfoArray[i].InterfaceUses[j]]^,ScanResult.UnitInfoArray[i].InterfaceUses[j],LogWriter,[LD_FullGraph]);
+         ProcessNode(DstUnitIndexs,SrcUnitIndexs,Options,ScanResult,ScanResult.UnitInfoArray.Mutable[ScanResult.UnitInfoArray[i].InterfaceUses[j]]^,ScanResult.UnitInfoArray[i].InterfaceUses[j],LogWriter,[LD_FullGraph]);
          if ScanResult.UnitInfoArray[ScanResult.UnitInfoArray[i].InterfaceUses[j]].NodeState<>NSFiltredOut then
          begin
          if (ScanResult.UnitInfoArray[i].cluster<>nil)and(Options.GraphBulding.PathClusters) then
@@ -339,7 +339,7 @@ begin
      begin
        for j:=0 to ScanResult.UnitInfoArray[i].ImplementationUses.Size-1 do
        begin
-         ProcessNode(SourceUnitIndexs,DestUnitIndexs,Options,ScanResult,ScanResult.UnitInfoArray.Mutable[ScanResult.UnitInfoArray[i].ImplementationUses[j]]^,ScanResult.UnitInfoArray[i].ImplementationUses[j],LogWriter,[LD_FullGraph]);
+         ProcessNode(DstUnitIndexs,SrcUnitIndexs,Options,ScanResult,ScanResult.UnitInfoArray.Mutable[ScanResult.UnitInfoArray[i].ImplementationUses[j]]^,ScanResult.UnitInfoArray[i].ImplementationUses[j],LogWriter,[LD_FullGraph]);
          if ScanResult.UnitInfoArray[ScanResult.UnitInfoArray[i].ImplementationUses[j]].NodeState<>NSFiltredOut then
          begin
          if (ScanResult.UnitInfoArray[i].cluster<>nil)and(Options.GraphBulding.PathClusters) then
@@ -391,10 +391,10 @@ begin
     end;
 
     LogWriter('}',[LD_FullGraph]);
-    if assigned(SourceUnitIndexs)then
-      SourceUnitIndexs.Free;
-    if assigned(DestUnitIndexs)then
-      DestUnitIndexs.Free;
+    if assigned(DstUnitIndexs)then
+      DstUnitIndexs.Free;
+    if assigned(SrcUnitIndexs)then
+      SrcUnitIndexs.Free;
     //LogWriter('CUT HERE 8x----------------------');
 
   end;
