@@ -27,6 +27,7 @@ type
     IncludeOnlyLoops:Boolean;
     IncludeToGraph:string;
     ExcludeFromGraph:string;
+    DirectlyUses:Boolean;
     DstUnit:string;
     SrcUnit:string;
     CalcEdgesWeight:Boolean;
@@ -99,6 +100,7 @@ begin
  result.GraphBulding.PathClusters:=true;
  result.GraphBulding.FullG.IncludeOnlyLoops:=false;
  result.GraphBulding.FullG.CalcEdgesWeight:=true;
+ result.GraphBulding.FullG.DirectlyUses:=false;
  result.GraphBulding.Circ.CalcEdgesWeight:=false;
 
  //result.GraphBulding.FullG.DstUnit:='uzeentity';

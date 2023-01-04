@@ -181,7 +181,7 @@ begin
    RunTimeUnit^.SetTypeDesk(TypeInfo(TFullG),['Include not founded units','Include interface uses',
                                               'Include implementation uses','Only looped edges',
                                               'Include to graph','Exclude from graph',
-                                              'Dest unit','Source unit','Calc edges weight']);
+                                              'Directly uses','Dest unit','Source unit','Calc edges weight']);
 
    RunTimeUnit^.SetTypeDesk(TypeInfo(TEdgeType),['Continuous','Dotted']);
 
@@ -326,7 +326,9 @@ begin
    if not assigned(ScanResult) then begin
      _Scan(nil);
      _Check(nil);
-   end;
+   end else
+     if (not assigned(ScanResult.G))or(not assigned(ScanResult.M))then
+       _Check(nil);
    if Options.ProgramOptions.Behavior.AutoSelectPages then
      Memo4.Show;
    WriteGraph(Options.ProjectOptions,ScanResult,DummyWriteToLog);

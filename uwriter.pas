@@ -101,11 +101,17 @@ begin
     begin
      //ScanResult.UnitInfoArray[i].;
      j:=ScanResult.G.FindMinPathDirected(ScanResult.G.Vertices[index],ScanResult.G.Vertices[_DstUnitIndex[i]],nil);
-     if ScanResult.G.FindMinPathDirected(ScanResult.G.Vertices[index],ScanResult.G.Vertices[_DstUnitIndex[i]],nil)>=0 then
+     if Options.GraphBulding.FullG.DirectlyUses then
+       connected:=(j>=0)and(j<2)
+     else
+       connected:=(j>=0);
+     if connected then
+       break;
+     {if (j>=0)and(j<2) then
      begin
       connected:=true;
       break;
-     end;
+     end;}
     end;
     if not connected then exit;
   end;
@@ -116,7 +122,7 @@ begin
     for i:=0 to _SrcUnitIndex.Size-1 do
     begin
      j:=ScanResult.G.FindMinPathDirected(ScanResult.G.Vertices[_SrcUnitIndex[i]],ScanResult.G.Vertices[index],nil);
-     if ScanResult.G.FindMinPathDirected(ScanResult.G.Vertices[_SrcUnitIndex[i]],ScanResult.G.Vertices[index],nil)>=0 then
+     if j>=0 then
      begin
       connected:=true;
       break;
@@ -179,16 +185,14 @@ var
   te:TEdge;
   v1,v2:TVertex;
   EdgePaths:TMultiList=nil;
-  Clusters:TClusters;
-  ClusterInfo:TClusterInfo;
+  Clusters:TClusters=nil;
+  ClusterInfo:TClusterInfo=nil;
   ClusterInfoPair:TClusterInfoPair;
-  DstUnitIndexs,SrcUnitIndexs:TNodeIndexes;
+  DstUnitIndexs:TNodeIndexes=nil;
+  SrcUnitIndexs:TNodeIndexes=nil;
   LC:TLinkCounter;
   LCP:TLinkCounterPair;
 begin
-  DstUnitIndexs:=nil;
-  SrcUnitIndexs:=nil;
-
   if Options.GraphBulding.FullG.DstUnit<>'' then
   begin
     DstUnitIndexs:=TNodeIndexes.create;
