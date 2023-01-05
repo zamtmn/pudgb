@@ -50,14 +50,14 @@ end;
 
 function CheckIncludeOptions(const Options:TProjectOptions;const UnitName:string):TIncludeToGraph;
 begin
-  if Options.GraphBulding.FullG.IncludeToGraph<>'' then
-    if not MatchesMaskList(UnitName,Options.GraphBulding.FullG.IncludeToGraph) then
+  if Options.GraphBulding.FullGraphOptions.IncludeToGraph<>'' then
+    if not MatchesMaskList(UnitName,Options.GraphBulding.FullGraphOptions.IncludeToGraph) then
       begin
         result:=ITG_Exclude;
         exit;
       end;
-  if Options.GraphBulding.FullG.ExcludeFromGraph<>'' then
-    if MatchesMaskList(UnitName,Options.GraphBulding.FullG.ExcludeFromGraph) then
+  if Options.GraphBulding.FullGraphOptions.ExcludeFromGraph<>'' then
+    if MatchesMaskList(UnitName,Options.GraphBulding.FullGraphOptions.ExcludeFromGraph) then
       begin
         result:=ITG_Exclude;
         exit;
@@ -68,13 +68,13 @@ end;
 function CheckCollapseOptions(const Options:TProjectOptions;const ClusterName:string):TCollapseCluster;
 begin
   result:=CC_Expand;
-  if Options.GraphBulding.CollapseClusters<>'' then
-    if MatchesMaskList(ClusterName,Options.GraphBulding.CollapseClusters) then
+  if Options.GraphBulding.FullGraphOptions.ClustersOptions.CollapseClusters<>'' then
+    if MatchesMaskList(ClusterName,Options.GraphBulding.FullGraphOptions.ClustersOptions.CollapseClusters) then
       begin
         result:=CC_Collapse;
       end;
-  if Options.GraphBulding.ExpandClusters<>'' then
-    if MatchesMaskList(ClusterName,Options.GraphBulding.ExpandClusters) then
+  if Options.GraphBulding.FullGraphOptions.ClustersOptions.ExpandClusters<>'' then
+    if MatchesMaskList(ClusterName,Options.GraphBulding.FullGraphOptions.ClustersOptions.ExpandClusters) then
       begin
         result:=CC_Expand;
       end;
@@ -86,10 +86,10 @@ var
   connected:boolean;
 begin
   result:=false;
-  if not Options.GraphBulding.FullG.IncludeNotFoundedUnits then
+  if not Options.GraphBulding.FullGraphOptions.IncludeNotFoundedUnits then
     if (node.UnitPath='')and(index<>0) then exit;
   if CheckIncludeOptions(Options,Node.UnitName)=ITG_Exclude then exit;
-  if Options.GraphBulding.FullG.IncludeOnlyLoops and not(UFLoop in node.UnitFlags) then exit;
+  if Options.GraphBulding.FullGraphOptions.IncludeOnlyCircularLoops and not(UFLoop in node.UnitFlags) then exit;
   if node.UnitName='uzestrconsts' then
                                       Node:=Node;
   connected:=true;
@@ -101,7 +101,7 @@ begin
     begin
      //ScanResult.UnitInfoArray[i].;
      j:=ScanResult.G.FindMinPathDirected(ScanResult.G.Vertices[index],ScanResult.G.Vertices[_DstUnitIndex[i]],nil);
-     if Options.GraphBulding.FullG.DirectlyUses then
+     if Options.GraphBulding.FullGraphOptions.OnlyDirectlyUses then
        connected:=(j>=0)and(j<2)
      else
        connected:=(j>=0);
@@ -193,24 +193,24 @@ var
   LC:TLinkCounter;
   LCP:TLinkCounterPair;
 begin
-  if Options.GraphBulding.FullG.DstUnit<>'' then
+  if Options.GraphBulding.FullGraphOptions.DstUnit<>'' then
   begin
     DstUnitIndexs:=TNodeIndexes.create;
     for i:=0 to ScanResult.UnitInfoArray.Size-1 do
       if CheckIncludeOptions(Options,ScanResult.UnitInfoArray.mutable[i]^.UnitName)=ITG_Include then
-         if MatchesMaskList(ScanResult.UnitInfoArray.mutable[i]^.UnitName,Options.GraphBulding.FullG.DstUnit) then
+         if MatchesMaskList(ScanResult.UnitInfoArray.mutable[i]^.UnitName,Options.GraphBulding.FullGraphOptions.DstUnit) then
            DstUnitIndexs.PushBack(i);
 
     if DstUnitIndexs.size<=0 then
       Application.MessageBox('Source unit not found in graph','Error!');
   end;
 
-  if Options.GraphBulding.FullG.SrcUnit<>'' then
+  if Options.GraphBulding.FullGraphOptions.SrcUnit<>'' then
   begin
     SrcUnitIndexs:=TNodeIndexes.create;
     for i:=0 to ScanResult.UnitInfoArray.Size-1 do
       if CheckIncludeOptions(Options,ScanResult.UnitInfoArray.mutable[i]^.UnitName)=ITG_Include then
-         if MatchesMaskList(ScanResult.UnitInfoArray.mutable[i]^.UnitName,Options.GraphBulding.FullG.SrcUnit) then
+         if MatchesMaskList(ScanResult.UnitInfoArray.mutable[i]^.UnitName,Options.GraphBulding.FullGraphOptions.SrcUnit) then
            SrcUnitIndexs.PushBack(i);
 
     if SrcUnitIndexs.size<=0 then
@@ -228,7 +228,7 @@ begin
        CheckNode(DstUnitIndexs,SrcUnitIndexs,Options,ScanResult,ScanResult.UnitInfoArray.Mutable[i]^,i,LogWriter,[LD_FullGraph]);
       end;
 
-      if Options.GraphBulding.PathClusters then
+      if Options.GraphBulding.FullGraphOptions.ClustersOptions.PathClusters then
       begin
        Clusters:=TClusters.create;
        for i:=0 to ScanResult.UnitInfoArray.Size-1 do
@@ -275,7 +275,7 @@ begin
        //ClusterInfo.Free
       end;
 
-    if Options.GraphBulding.FullG.IncludeInterfaceUses then
+    if Options.GraphBulding.FullGraphOptions.IncludeInterfaceUses then
     begin
     LC:=TLinkCounter.create;
     if Options.GraphBulding.InterfaceUsesEdgeType=ETDotted then
@@ -293,7 +293,7 @@ begin
          ProcessNode(DstUnitIndexs,SrcUnitIndexs,Options,ScanResult,ScanResult.UnitInfoArray.Mutable[ScanResult.UnitInfoArray[i].InterfaceUses[j]]^,ScanResult.UnitInfoArray[i].InterfaceUses[j],LogWriter,[LD_FullGraph]);
          if ScanResult.UnitInfoArray[ScanResult.UnitInfoArray[i].InterfaceUses[j]].NodeState<>NSFiltredOut then
          begin
-         if (ScanResult.UnitInfoArray[i].cluster<>nil)and(Options.GraphBulding.PathClusters) then
+         if (ScanResult.UnitInfoArray[i].cluster<>nil)and(Options.GraphBulding.FullGraphOptions.ClustersOptions.PathClusters) then
            cc:=ScanResult.UnitInfoArray[i].cluster.collapsed
          else
            cc:=CC_Expand;
@@ -303,7 +303,7 @@ begin
          else
            nstart:=getDecoratedClusterName(ScanResult.UnitInfoArray[i].UnitPath,ScanResult.UnitInfoArray[i].cluster.size);
 
-         if (ScanResult.UnitInfoArray[ScanResult.UnitInfoArray[i].InterfaceUses[j]].cluster<>nil)and(Options.GraphBulding.PathClusters) then
+         if (ScanResult.UnitInfoArray[ScanResult.UnitInfoArray[i].InterfaceUses[j]].cluster<>nil)and(Options.GraphBulding.FullGraphOptions.ClustersOptions.PathClusters) then
            cc:=ScanResult.UnitInfoArray[ScanResult.UnitInfoArray[i].InterfaceUses[j]].cluster.collapsed
          else
            cc:=CC_Expand;
@@ -321,7 +321,7 @@ begin
     end;
     for LCP in LC do
        begin
-         if (LCP.Value>1)and(Options.GraphBulding.LabelClustersEdges) then
+         if (LCP.Value>1)and(Options.GraphBulding.FullGraphOptions.ClustersOptions.LabelClustersEdges) then
            LogWriter(format('%s  [label=%d]',[LCP.Key,LCP.Value]),[LD_FullGraph])
          else
            LogWriter(LCP.Key,[LD_FullGraph]);
@@ -329,7 +329,7 @@ begin
     LC.free;
     end;
 
-    if Options.GraphBulding.FullG.IncludeImplementationUses then
+    if Options.GraphBulding.FullGraphOptions.IncludeImplementationUses then
     begin
     LC:=TLinkCounter.create;
     if Options.GraphBulding.ImplementationUsesEdgeType=ETDotted then
@@ -346,7 +346,7 @@ begin
          ProcessNode(DstUnitIndexs,SrcUnitIndexs,Options,ScanResult,ScanResult.UnitInfoArray.Mutable[ScanResult.UnitInfoArray[i].ImplementationUses[j]]^,ScanResult.UnitInfoArray[i].ImplementationUses[j],LogWriter,[LD_FullGraph]);
          if ScanResult.UnitInfoArray[ScanResult.UnitInfoArray[i].ImplementationUses[j]].NodeState<>NSFiltredOut then
          begin
-         if (ScanResult.UnitInfoArray[i].cluster<>nil)and(Options.GraphBulding.PathClusters) then
+         if (ScanResult.UnitInfoArray[i].cluster<>nil)and(Options.GraphBulding.FullGraphOptions.ClustersOptions.PathClusters) then
            cc:=ScanResult.UnitInfoArray[i].cluster.collapsed
          else
            cc:=CC_Expand;
@@ -356,7 +356,7 @@ begin
          else
            nstart:=getDecoratedClusterName(ScanResult.UnitInfoArray[i].UnitPath,ScanResult.UnitInfoArray[i].cluster.size);
 
-         if (ScanResult.UnitInfoArray[ScanResult.UnitInfoArray[i].ImplementationUses[j]].cluster<>nil)and(Options.GraphBulding.PathClusters) then
+         if (ScanResult.UnitInfoArray[ScanResult.UnitInfoArray[i].ImplementationUses[j]].cluster<>nil)and(Options.GraphBulding.FullGraphOptions.ClustersOptions.PathClusters) then
            cc:=ScanResult.UnitInfoArray[ScanResult.UnitInfoArray[i].ImplementationUses[j]].cluster.collapsed
          else
            cc:=CC_Expand;
@@ -376,7 +376,7 @@ begin
     end;
     for LCP in LC do
        begin
-         if (LCP.Value>1)and(Options.GraphBulding.LabelClustersEdges) then
+         if (LCP.Value>1)and(Options.GraphBulding.FullGraphOptions.ClustersOptions.LabelClustersEdges) then
            LogWriter(format('%s  [label=%d]',[LCP.Key,LCP.Value]),[LD_FullGraph])
          else
            LogWriter(LCP.Key,[LD_FullGraph]);
@@ -384,7 +384,7 @@ begin
     LC.free;
     end;
 
-    if Options.GraphBulding.PathClusters then
+    if Options.GraphBulding.FullGraphOptions.ClustersOptions.PathClusters then
     begin
       if assigned(Clusters)then
         Clusters.Free;

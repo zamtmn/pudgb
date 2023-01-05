@@ -42,7 +42,7 @@ begin
       for i:=0 to ScanResult.UnitInfoArray.Size-1 do
        ScanResult.UnitInfoArray.mutable[i]^.NodeState:=NSNotCheced;
 
-    if Options.GraphBulding.FullG.IncludeInterfaceUses then
+    if Options.GraphBulding.FullGraphOptions.IncludeInterfaceUses then
     for i:=0 to ScanResult.UnitInfoArray.Size-1 do
     begin
      if ScanResult.UnitInfoArray[i].InterfaceUses.Size>0 then
@@ -63,7 +63,7 @@ begin
      end;
     end;
 
-    if Options.GraphBulding.FullG.IncludeImplementationUses then
+    if Options.GraphBulding.FullGraphOptions.IncludeImplementationUses then
     for i:=0 to ScanResult.UnitInfoArray.Size-1 do
     begin
      if ScanResult.UnitInfoArray[i].NodeState<>NSFiltredOut then

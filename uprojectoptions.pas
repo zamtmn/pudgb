@@ -7,6 +7,11 @@ interface
 uses
   Classes, SysUtils;
 
+const
+  ETContinuousName='Continuous';
+  ETDottedName='Dotted';
+  ETUCDottedName='DOTTED';
+
 type
   {$Z1}
   TPasPaths=packed record
@@ -17,31 +22,33 @@ type
     _CompilerOptions:String;
     TargetOS,TargetCPU:String;
   end;
-  TCircularG=packed record
+  TCircularGraphOptions=packed record
     CalcEdgesWeight:Boolean;
   end;
-  TFullG=packed record
-    IncludeNotFoundedUnits:Boolean;
-    IncludeInterfaceUses:Boolean;
-    IncludeImplementationUses:Boolean;
-    IncludeOnlyLoops:Boolean;
-    IncludeToGraph:string;
-    ExcludeFromGraph:string;
-    DirectlyUses:Boolean;
-    DstUnit:string;
-    SrcUnit:string;
-    CalcEdgesWeight:Boolean;
-  end;
-  TEdgeType=(ETContinuous,ETDotted);
-  TGraphBulding=packed record
-    Circ:TCircularG;
-    FullG:TFullG;
-    InterfaceUsesEdgeType:TEdgeType;
-    ImplementationUsesEdgeType:TEdgeType;
+  TClustersOptions=packed record
     PathClusters:Boolean;
     CollapseClusters:string;
     ExpandClusters:string;
     LabelClustersEdges:Boolean;
+  end;
+  TFullGraphOptions=packed record
+    ClustersOptions:TClustersOptions;
+    IncludeNotFoundedUnits:Boolean;
+    IncludeInterfaceUses:Boolean;
+    IncludeImplementationUses:Boolean;
+    IncludeOnlyCircularLoops:Boolean;
+    IncludeToGraph:string;
+    ExcludeFromGraph:string;
+    OnlyDirectlyUses:Boolean;
+    DstUnit:string;
+    SrcUnit:string;
+  end;
+  TEdgeType=(ETContinuous,ETDotted);
+  TGraphBulding=packed record
+    CircularGraphOptions:TCircularGraphOptions;
+    FullGraphOptions:TFullGraphOptions;
+    InterfaceUsesEdgeType:TEdgeType;
+    ImplementationUsesEdgeType:TEdgeType;
   end;
   PTProjectOptions=^TProjectOptions;
   TProjectOptions=packed record
@@ -54,10 +61,28 @@ type
   TLogOpt=set of TLogDir;
   TLogWriter=procedure(msg:string; const LogOpt:TLogOpt) of object;
 
-function DefaultOptions:TProjectOptions;
+function DefaultProjectOptions:TProjectOptions;
 function GetCompilerDefs:String;
+function EdgeType2String(ET:TEdgeType):String;
+function String2EdgeType(ETn:String):TEdgeType;
 
 implementation
+function EdgeType2String(ET:TEdgeType):String;
+begin
+ case ET of
+   ETContinuous:result:=ETContinuousName;
+   ETDotted:result:=ETDottedName;
+ end;
+end;
+
+function String2EdgeType(ETn:String):TEdgeType;
+begin
+ if UpperCase(ETn)=ETUCDottedName then
+   result:=ETDotted
+ else
+   result:=ETContinuous;
+end;
+
 function GetCompilerDefs:String;
 procedure adddef(def:string);
 begin
@@ -83,7 +108,7 @@ begin
  {$ifdef LCLGTK2}adddef('LCLGTK2');{$endif}
 end;
 
-function DefaultOptions:TProjectOptions;
+function DefaultProjectOptions:TProjectOptions;
 begin
  result.Paths._File:='?? import or edit this';
  result.Paths._Paths:='?? import or edit this';
@@ -92,19 +117,18 @@ begin
  result.ParserOptions.TargetOS:={$I %FPCTARGETOS%};
  result.ParserOptions.TargetCPU:={$I %FPCTARGETCPU%};
 
- result.GraphBulding.FullG.IncludeNotFoundedUnits:=false;
- result.GraphBulding.FullG.IncludeInterfaceUses:=true;
+ result.GraphBulding.FullGraphOptions.IncludeNotFoundedUnits:=false;
+ result.GraphBulding.FullGraphOptions.IncludeInterfaceUses:=true;
  result.GraphBulding.InterfaceUsesEdgeType:=ETContinuous;
- result.GraphBulding.FullG.IncludeImplementationUses:=true;
+ result.GraphBulding.FullGraphOptions.IncludeImplementationUses:=true;
  result.GraphBulding.ImplementationUsesEdgeType:=ETDotted;
- result.GraphBulding.PathClusters:=true;
- result.GraphBulding.FullG.IncludeOnlyLoops:=false;
- result.GraphBulding.FullG.CalcEdgesWeight:=true;
- result.GraphBulding.FullG.DirectlyUses:=false;
- result.GraphBulding.Circ.CalcEdgesWeight:=false;
-
- //result.GraphBulding.FullG.DstUnit:='uzeentity';
- //result.GraphBulding.FullG.SrcUnit:='uzeenttext';
+ result.GraphBulding.FullGraphOptions.ClustersOptions.PathClusters:=true;
+ result.GraphBulding.FullGraphOptions.ClustersOptions.CollapseClusters:='';
+ result.GraphBulding.FullGraphOptions.ClustersOptions.ExpandClusters:='';
+ result.GraphBulding.FullGraphOptions.ClustersOptions.LabelClustersEdges:=false;
+ result.GraphBulding.FullGraphOptions.IncludeOnlyCircularLoops:=false;
+ result.GraphBulding.FullGraphOptions.OnlyDirectlyUses:=false;
+ result.GraphBulding.CircularGraphOptions.CalcEdgesWeight:=false;
 end;
 
 end.

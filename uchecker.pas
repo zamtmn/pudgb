@@ -103,7 +103,7 @@ begin
                                   LogWriter(' edge [style=dotted]',[LD_CircGraph])
                               else
                                   LogWriter(' edge [style=solid]',[LD_CircGraph]);
-       if Options.GraphBulding.Circ.CalcEdgesWeight then
+       if Options.GraphBulding.CircularGraphOptions.CalcEdgesWeight then
        begin
          te:=ScanResult.G.Edges[i];
          te.Hide;

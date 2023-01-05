@@ -12,6 +12,7 @@ uses
 
   zcobjectinspectorui,uzctypesdecorations,uzedimensionaltypes,zcobjectinspector,Varman,uzbtypes,uzemathutils,UUnitManager,varmandef,zcobjectinspectoreditors,UEnumDescriptor,
 
+  XMLConf,XMLPropStorage,LazConfigStorage,
 
   {$IFDEF CHECKLOOPS}uchecker,{$ENDIF}
   {$IFDEF GRAPHVIZUALIZER}uvizualizer,{$ENDIF}uprojectoptions,uprogramoptions,
@@ -22,7 +23,17 @@ uses
   { TForm1 }
 
   TForm1 = class(TForm)
+    PrgOptsSave: TAction;
+    PrgOptsLoad: TAction;
+    PrjOptsSave: TAction;
+    PrjOptsLoad: TAction;
     btnVizualize: TToolButton;
+    MenuItem1: TMenuItem;
+    MenuItem3: TMenuItem;
+    mniSeparator01: TMenuItem;
+    MenuItem2: TMenuItem;
+    mniSeparator03: TMenuItem;
+    MenuItem4: TMenuItem;
     Vizualize: TAction;
     Save: TAction;
     Check: TAction;
@@ -45,9 +56,9 @@ uses
     mniFile: TMenuItem;
     mniScan: TMenuItem;
     mniGenerate: TMenuItem;
-    mniSeparator: TMenuItem;
+    mniSeparator02: TMenuItem;
     mniImportLPI: TMenuItem;
-    mniSeparator2: TMenuItem;
+    mniSeparator04: TMenuItem;
     mniExit: TMenuItem;
     mniOpenDPR: TMenuItem;
     Splitter1: TSplitter;
@@ -68,6 +79,9 @@ uses
     btnSave: TToolButton;
     procedure _CodeExplorer(Sender: TObject);
     procedure _Exit(Sender: TObject);
+    procedure _PrgOptsSave(Sender: TObject);
+    procedure _PrjOptsLoad(Sender: TObject);
+    procedure _PrjOptsSave(Sender: TObject);
     procedure _SaveCurrentGraph(Sender: TObject);
     procedure _SaveGML(Sender: TObject);
     procedure _ImportLPI(Sender: TObject);
@@ -128,7 +142,7 @@ end;
 
 procedure TForm1._onCreate(Sender: TObject);
 begin
-   Options.ProjectOptions:=DefaultOptions;
+   Options.ProjectOptions:=DefaultProjectOptions;
    UnitsFormat:=CreateDefaultUnitsFormat;
    INTFObjInspShowOnlyHotFastEditors:=false;
 
@@ -145,21 +159,7 @@ begin
    RunTimeUnit^.RegisterType(TypeInfo(TProgramOptions));
 
    //setup default ProgramOptions
-   Options.ProgramOptions.ProgPaths._PathToDot:='E:\Program Files (x86)\Graphviz2.38\bin\dot.exe';
-{$ifdef windows}
-   Options.ProgramOptions.ProgPaths._PathToLazarusConf:=GetEnvironmentVariable('LOCALAPPDATA')+'\lazarus';
-{$elseif}
-   Options.ProgramOptions.ProgPaths._PathToLazarusConf:='~/.lazarus';
-{$endif}
-   Options.ProgramOptions.ProgPaths._Temp:=GetTempDir;
-   Options.ProgramOptions.Behavior.AutoClearPages:=true;
-   Options.ProgramOptions.Behavior.AutoSelectPages:=true;
-   Options.ProgramOptions.Visualizer.VisBackend:=VB_GDI;
-   Options.ProgramOptions.Logger.ScanerMessages:=false;
-   Options.ProgramOptions.Logger.ParserMessages:=false;
-   Options.ProgramOptions.Logger.Timer:=true;
-   Options.ProgramOptions.Logger.Notfounded:=false;
-
+   Options.ProgramOptions:=DefaultProgramOptions;
 
    //register TProjectOptions in zscript unit
    RunTimeUnit^.RegisterType(TypeInfo(TProjectOptions));
@@ -176,12 +176,12 @@ begin
                                                      'Collapse clusters mask',
                                                      'Expand clusters mask',
                                                      'Label clusters edges']);
-
-   RunTimeUnit^.SetTypeDesk(TypeInfo(TCircularG),['Calc edges weight']);
-   RunTimeUnit^.SetTypeDesk(TypeInfo(TFullG),['Include not founded units','Include interface uses',
+   RunTimeUnit^.SetTypeDesk(TypeInfo(TClustersOptions),['Clusters','Collapse clusters mask','Expand clusters mask','Label clusters edges']);
+   RunTimeUnit^.SetTypeDesk(TypeInfo(TCircularGraphOptions),['Calc edges weight']);
+   RunTimeUnit^.SetTypeDesk(TypeInfo(TFullGraphOptions),['Clusters','Include not founded units','Include interface uses',
                                               'Include implementation uses','Only looped edges',
                                               'Include to graph','Exclude from graph',
-                                              'Directly uses','Dest unit','Source unit','Calc edges weight']);
+                                              'Directly uses','Dest unit','Source unit']);
 
    RunTimeUnit^.SetTypeDesk(TypeInfo(TEdgeType),['Continuous','Dotted']);
 
@@ -189,8 +189,8 @@ begin
    Options.ProjectOptions.Paths._File:=ExtractFileDir(ParamStr(0))+pathdelim+'passrcerrors.pas';
    Options.ProjectOptions.Paths._Paths:=ExtractFileDir(ParamStr(0));
 
-   Options.ProjectOptions.GraphBulding.FullG.IncludeToGraph:='';
-   Options.ProjectOptions.GraphBulding.FullG.ExcludeFromGraph:='';
+   Options.ProjectOptions.GraphBulding.FullGraphOptions.IncludeToGraph:='';
+   Options.ProjectOptions.GraphBulding.FullGraphOptions.ExcludeFromGraph:='';
 
    //Add standart and 'fast' editors for types showed in object inspector
    AddEditorToType(RunTimeUnit^.TypeName2PTD('Integer'),TBaseTypesEditors.BaseCreateEditor);//register standart editor to integer type
@@ -292,6 +292,161 @@ end;
 procedure TForm1._Exit(Sender: TObject);
 begin
  close;
+end;
+
+procedure SaveProgramOptionsToConfig(Config:TConfigStorage;const Params,Defaults:TProgramOptions);
+begin
+  Config.AppendBasePath('PUDGBProgramOptions/');
+
+    Config.AppendBasePath('Paths/');
+      Config.SetDeleteValue('PathToDot',Params.ProgPaths._PathToDot,Defaults.ProgPaths._PathToDot);
+      Config.SetDeleteValue('PathToLazarusConf',Params.ProgPaths._PathToLazarusConf,Defaults.ProgPaths._PathToLazarusConf);
+      Config.SetDeleteValue('Temp',Params.ProgPaths._Temp,Defaults.ProgPaths._Temp);
+    Config.UndoAppendBasePath;
+
+    Config.AppendBasePath('Behavior/');
+      Config.SetDeleteValue('AutoSelectPages',Params.Behavior.AutoSelectPages,Defaults.Behavior.AutoSelectPages);
+      Config.SetDeleteValue('AutoClearPages',Params.Behavior.AutoClearPages,Defaults.Behavior.AutoClearPages);
+    Config.UndoAppendBasePath;
+
+    //Config.AppendBasePath('Visualizer/');
+    //Config.UndoAppendBasePath;
+
+    Config.AppendBasePath('Logger/');
+      Config.SetDeleteValue('ScanerMessages',Params.Logger.ScanerMessages,Defaults.Logger.ScanerMessages);
+      Config.SetDeleteValue('ParserMessages',Params.Logger.ParserMessages,Defaults.Logger.ParserMessages);
+      Config.SetDeleteValue('Timer',Params.Logger.Timer,Defaults.Logger.Timer);
+      Config.SetDeleteValue('Notfounded',Params.Logger.Notfounded,Defaults.Logger.Notfounded);
+    Config.UndoAppendBasePath;
+
+  Config.UndoAppendBasePath;
+end;
+
+
+procedure SavePrgOpts(xmlfile:string;const Params:TProgramOptions);
+var
+  XMLConfig: TXMLConfig;
+  Config: TXMLConfigStorage;
+begin
+  If FileExists(xmlfile) then
+    DeleteFile(xmlfile);
+  XMLConfig:=TXMLConfig.Create(nil);
+  try
+    XMLConfig.StartEmpty:=true;
+    XMLConfig.Filename:=xmlfile;
+    Config:=TXMLConfigStorage.Create(XMLConfig);
+    try
+      SaveProgramOptionsToConfig(Config,Params,DefaultProgramOptions);
+    finally
+      Config.Free;
+    end;
+    XMLConfig.Flush;
+  finally
+    XMLConfig.Free;
+  end;
+end;
+
+
+procedure TForm1._PrgOptsSave(Sender: TObject);
+var
+  sd:TSaveDialog;
+begin
+   sd:=TSaveDialog.Create(nil);
+   sd.Title:='Save program options';
+   sd.Filter:='Program options files (*.prgxml)|*.prgxml|All files (*.*)|*.*';
+   sd.DefaultExt:='prgxml';
+   sd.FilterIndex := 1;
+   if sd.Execute then
+     //SavePrjOpts(sd.FileName,Options.ProjectOptions);
+   sd.Free;
+end;
+
+procedure TForm1._PrjOptsLoad(Sender: TObject);
+begin
+
+end;
+
+procedure SaveProjectOptionsToConfig(Config:TConfigStorage;const Params,Defaults:TProjectOptions);
+begin
+  Config.AppendBasePath('PUDGBProjectOptions/');
+
+    Config.AppendBasePath('Paths/');
+      Config.SetDeleteValue('File',Params.Paths._File,Defaults.Paths._File);
+      Config.SetDeleteValue('Paths',Params.Paths._Paths,Defaults.Paths._Paths);
+    Config.UndoAppendBasePath;
+
+    Config.AppendBasePath('ParserOptions/');
+      Config.SetDeleteValue('CompilerOptions',Params.ParserOptions._CompilerOptions,Defaults.ParserOptions._CompilerOptions);
+      Config.SetDeleteValue('TargetOS',Params.ParserOptions.TargetOS,Defaults.ParserOptions.TargetOS);
+      Config.SetDeleteValue('TargetCPU',Params.ParserOptions.TargetCPU,Defaults.ParserOptions.TargetCPU);
+    Config.UndoAppendBasePath;
+
+    Config.AppendBasePath('GraphBulding/');
+      Config.AppendBasePath('CircularGraphOptions/');
+        Config.SetDeleteValue('CalcEdgesWeight',Params.GraphBulding.CircularGraphOptions.CalcEdgesWeight,Defaults.GraphBulding.CircularGraphOptions.CalcEdgesWeight);
+      Config.UndoAppendBasePath;
+
+      Config.AppendBasePath('FullGraphOptions/');
+        Config.AppendBasePath('CircularGraphOptions/');
+          Config.SetDeleteValue('PathClusters',Params.GraphBulding.FullGraphOptions.ClustersOptions.PathClusters,Defaults.GraphBulding.FullGraphOptions.ClustersOptions.PathClusters);
+          Config.SetDeleteValue('CollapseClusters',Params.GraphBulding.FullGraphOptions.ClustersOptions.CollapseClusters,Defaults.GraphBulding.FullGraphOptions.ClustersOptions.CollapseClusters);
+          Config.SetDeleteValue('ExpandClusters',Params.GraphBulding.FullGraphOptions.ClustersOptions.ExpandClusters,Defaults.GraphBulding.FullGraphOptions.ClustersOptions.ExpandClusters);
+          Config.SetDeleteValue('LabelClustersEdges',Params.GraphBulding.FullGraphOptions.ClustersOptions.LabelClustersEdges,Defaults.GraphBulding.FullGraphOptions.ClustersOptions.LabelClustersEdges);
+        Config.UndoAppendBasePath;
+        Config.SetDeleteValue('IncludeNotFoundedUnits',Params.GraphBulding.FullGraphOptions.IncludeNotFoundedUnits,Defaults.GraphBulding.FullGraphOptions.IncludeNotFoundedUnits);
+        Config.SetDeleteValue('IncludeInterfaceUses',Params.GraphBulding.FullGraphOptions.IncludeInterfaceUses,Defaults.GraphBulding.FullGraphOptions.IncludeInterfaceUses);
+        Config.SetDeleteValue('IncludeImplementationUses',Params.GraphBulding.FullGraphOptions.IncludeImplementationUses,Defaults.GraphBulding.FullGraphOptions.IncludeImplementationUses);
+        Config.SetDeleteValue('IncludeOnlyCircularLoops',Params.GraphBulding.FullGraphOptions.IncludeOnlyCircularLoops,Defaults.GraphBulding.FullGraphOptions.IncludeOnlyCircularLoops);
+        Config.SetDeleteValue('IncludeToGraph',Params.GraphBulding.FullGraphOptions.IncludeToGraph,Defaults.GraphBulding.FullGraphOptions.IncludeToGraph);
+        Config.SetDeleteValue('ExcludeFromGraph',Params.GraphBulding.FullGraphOptions.ExcludeFromGraph,Defaults.GraphBulding.FullGraphOptions.ExcludeFromGraph);
+        Config.SetDeleteValue('OnlyDirectlyUses',Params.GraphBulding.FullGraphOptions.OnlyDirectlyUses,Defaults.GraphBulding.FullGraphOptions.OnlyDirectlyUses);
+        Config.SetDeleteValue('DstUnit',Params.GraphBulding.FullGraphOptions.DstUnit,Defaults.GraphBulding.FullGraphOptions.DstUnit);
+        Config.SetDeleteValue('SrcUnit',Params.GraphBulding.FullGraphOptions.SrcUnit,Defaults.GraphBulding.FullGraphOptions.SrcUnit);
+      Config.UndoAppendBasePath;
+
+      Config.SetDeleteValue('InterfaceUsesEdgeType',EdgeType2String(Params.GraphBulding.InterfaceUsesEdgeType),EdgeType2String(Defaults.GraphBulding.InterfaceUsesEdgeType));
+      Config.SetDeleteValue('ImplementationUsesEdgeType',EdgeType2String(Params.GraphBulding.ImplementationUsesEdgeType),EdgeType2String(Defaults.GraphBulding.ImplementationUsesEdgeType));
+    Config.UndoAppendBasePath;
+
+  Config.UndoAppendBasePath;
+end;
+
+procedure SavePrjOpts(xmlfile:string;const Params:TProjectOptions);
+var
+  XMLConfig: TXMLConfig;
+  Config: TXMLConfigStorage;
+begin
+  If FileExists(xmlfile) then
+    DeleteFile(xmlfile);
+  XMLConfig:=TXMLConfig.Create(nil);
+  try
+    XMLConfig.StartEmpty:=true;
+    XMLConfig.Filename:=xmlfile;
+    Config:=TXMLConfigStorage.Create(XMLConfig);
+    try
+      SaveProjectOptionsToConfig(Config,Params,DefaultProjectOptions);
+    finally
+      Config.Free;
+    end;
+    XMLConfig.Flush;
+  finally
+    XMLConfig.Free;
+  end;
+end;
+
+
+procedure TForm1._PrjOptsSave(Sender: TObject);
+var
+  sd:TSaveDialog;
+begin
+   sd:=TSaveDialog.Create(nil);
+   sd.Title:='Save project options';
+   sd.Filter:='Project options files (*.prjxml)|*.prjxml|All files (*.*)|*.*';
+   sd.DefaultExt:='prjxml';
+   sd.FilterIndex := 1;
+   if sd.Execute then
+     SavePrjOpts(sd.FileName,Options.ProjectOptions);
+   sd.Free;
 end;
 
 procedure TForm1._SaveCurrentGraph(Sender: TObject);

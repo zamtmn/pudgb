@@ -1,43 +1,42 @@
 object Form1: TForm1
   Left = 583
-  Height = 659
+  Height = 840
   Top = 239
-  Width = 737
+  Width = 939
   Caption = 'Form1'
-  ClientHeight = 636
-  ClientWidth = 737
-  DesignTimePPI = 113
+  ClientHeight = 816
+  ClientWidth = 939
+  DesignTimePPI = 144
   Menu = MainMenu1
   OnClose = _onClose
   OnCreate = _onCreate
-  LCLVersion = '1.9.0.0'
   object StatusBar1: TStatusBar
     Left = 0
-    Height = 28
-    Top = 608
-    Width = 737
+    Height = 27
+    Top = 789
+    Width = 939
     Panels = <>
   end
   object ToolBar1: TToolBar
     Left = 0
-    Height = 28
+    Height = 35
     Top = 0
-    Width = 737
+    Width = 939
     AutoSize = True
-    ButtonHeight = 26
-    ButtonWidth = 27
+    ButtonHeight = 33
+    ButtonWidth = 34
     Caption = 'ToolBar1'
     ParentShowHint = False
     ShowCaptions = True
     ShowHint = True
     TabOrder = 1
     object btnScan: TToolButton
-      Left = 142
+      Left = 166
       Top = 2
       Action = Scan
     end
     object btnGenerateFullGraph: TToolButton
-      Left = 223
+      Left = 261
       Top = 2
       Action = GenerateFullGraph
     end
@@ -47,80 +46,80 @@ object Form1: TForm1
       Action = ImportLPI
     end
     object btnGenerateGML: TToolButton
-      Left = 385
+      Left = 450
       Top = 2
       Action = SaveGML
       Visible = False
     end
     object btnOpenWebGraViz: TToolButton
-      Left = 600
+      Left = 700
       Top = 2
       Action = OpenWebGraphviz
     end
     object btnCodeExplorer: TToolButton
-      Left = 511
+      Left = 595
       Top = 2
       Action = CodeExplorer
     end
     object btnOpenDPR: TToolButton
-      Left = 74
+      Left = 88
       Top = 2
       Action = OpenDPR
     end
     object btnCheckCircularDependecies: TToolButton
-      Left = 178
+      Left = 209
       Top = 2
       Action = Check
     end
     object btnSave: TToolButton
-      Left = 349
+      Left = 407
       Top = 2
       Action = Save
     end
     object btnVizualize: TToolButton
-      Left = 451
+      Left = 524
       Top = 2
       Action = Vizualize
     end
   end
   object Splitter1: TSplitter
-    Left = 353
-    Height = 580
-    Top = 28
-    Width = 5
+    Left = 450
+    Height = 754
+    Top = 35
+    Width = 6
   end
   object GDBobjinsp1: TGDBobjinsp
     Left = 0
-    Height = 580
-    Top = 28
-    Width = 353
+    Height = 754
+    Top = 35
+    Width = 450
     HorzScrollBar.Page = 1
     VertScrollBar.Increment = 200
-    VertScrollBar.Page = 580
-    VertScrollBar.Range = 580
+    VertScrollBar.Page = 754
+    VertScrollBar.Range = 754
     Align = alLeft
     AutoScroll = False
     BorderStyle = bsNone
     TabOrder = 3
   end
   object PageControl1: TPageControl
-    Left = 358
-    Height = 580
-    Top = 28
-    Width = 379
+    Left = 456
+    Height = 754
+    Top = 35
+    Width = 483
     ActivePage = TabReport
     Align = alClient
     TabIndex = 0
     TabOrder = 4
     object TabReport: TTabSheet
       Caption = 'TabReport'
-      ClientHeight = 548
-      ClientWidth = 371
+      ClientHeight = 709
+      ClientWidth = 479
       object Memo2: TMemo
         Left = 0
-        Height = 548
+        Height = 709
         Top = 0
-        Width = 371
+        Width = 479
         Align = alClient
         ScrollBars = ssAutoBoth
         TabOrder = 0
@@ -128,13 +127,13 @@ object Form1: TForm1
     end
     object TabCircularGraph: TTabSheet
       Caption = 'TabCircularGraph'
-      ClientHeight = 548
-      ClientWidth = 371
+      ClientHeight = 709
+      ClientWidth = 479
       object Memo3: TMemo
         Left = 0
-        Height = 548
+        Height = 709
         Top = 0
-        Width = 371
+        Width = 479
         Align = alClient
         ScrollBars = ssAutoBoth
         TabOrder = 0
@@ -142,13 +141,13 @@ object Form1: TForm1
     end
     object TabFullGraph: TTabSheet
       Caption = 'TabFullGraph'
-      ClientHeight = 548
-      ClientWidth = 371
+      ClientHeight = 709
+      ClientWidth = 479
       object Memo4: TMemo
         Left = 0
-        Height = 548
+        Height = 709
         Top = 0
-        Width = 371
+        Width = 479
         Align = alClient
         ScrollBars = ssAutoBoth
         TabOrder = 0
@@ -156,13 +155,13 @@ object Form1: TForm1
     end
     object TabAll: TTabSheet
       Caption = 'TabAll'
-      ClientHeight = 548
-      ClientWidth = 371
+      ClientHeight = 709
+      ClientWidth = 479
       object Memo1: TMemo
         Left = 0
-        Height = 548
+        Height = 709
         Top = 0
-        Width = 371
+        Width = 479
         Align = alClient
         ScrollBars = ssAutoBoth
         TabOrder = 0
@@ -171,8 +170,8 @@ object Form1: TForm1
   end
   object ActionList1: TActionList
     OnUpdate = ActionUpdate
-    Left = 456
-    Top = 32
+    Left = 581
+    Top = 41
     object Scan: TAction
       Caption = 'Scan'
       Hint = 'Scan files'
@@ -230,19 +229,43 @@ object Form1: TForm1
       Caption = 'Vizualize'
       OnExecute = _Vizualize
     end
+    object PrgOptsSave: TAction
+      Caption = 'Program options save'
+      OnExecute = _PrgOptsSave
+    end
+    object PrgOptsLoad: TAction
+      Caption = 'Program options load'
+    end
+    object PrjOptsSave: TAction
+      Caption = 'Project options save'
+      OnExecute = _PrjOptsSave
+    end
+    object PrjOptsLoad: TAction
+      Caption = 'Project options load'
+      OnExecute = _PrjOptsLoad
+    end
   end
   object MainMenu1: TMainMenu
-    Left = 416
-    Top = 32
+    Left = 530
+    Top = 41
     object mniFile: TMenuItem
       Caption = 'File'
+      object MenuItem1: TMenuItem
+        Action = PrjOptsSave
+      end
+      object MenuItem2: TMenuItem
+        Action = PrjOptsLoad
+      end
+      object mniSeparator01: TMenuItem
+        Caption = '-'
+      end
       object mniScan: TMenuItem
         Action = Scan
       end
       object mniGenerate: TMenuItem
         Action = GenerateFullGraph
       end
-      object mniSeparator: TMenuItem
+      object mniSeparator02: TMenuItem
         Caption = '-'
       end
       object mniImportLPI: TMenuItem
@@ -251,7 +274,16 @@ object Form1: TForm1
       object mniOpenDPR: TMenuItem
         Action = OpenDPR
       end
-      object mniSeparator2: TMenuItem
+      object mniSeparator03: TMenuItem
+        Caption = '-'
+      end
+      object MenuItem4: TMenuItem
+        Action = PrgOptsSave
+      end
+      object MenuItem3: TMenuItem
+        Action = PrgOptsLoad
+      end
+      object mniSeparator04: TMenuItem
         Caption = '-'
       end
       object mniExit: TMenuItem
