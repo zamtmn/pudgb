@@ -235,6 +235,7 @@ object Form1: TForm1
     end
     object PrgOptsLoad: TAction
       Caption = 'Program options load'
+      OnExecute = _PrgOptsLoad
     end
     object PrjOptsSave: TAction
       Caption = 'Project options save'
