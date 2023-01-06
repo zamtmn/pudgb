@@ -141,9 +141,98 @@ begin
      end;
 end;
 
+procedure LoadPrgOpts(xmlfile:string;out Params:TProgramOptions);
+var
+  XMLConfig:TXMLConfig;
+begin
+  Params:=DefaultProgramOptions;
+  XMLConfig:=TXMLConfig.Create(nil);
+  XMLConfig.Filename:=xmlfile;
+
+  XMLConfig.OpenKey('PUDGBProgramOptions');
+
+    XMLConfig.OpenKey('Paths');
+      Params.ProgPaths._PathToDot:=XMLConfig.GetValue('PathToDot',Params.ProgPaths._PathToDot);
+      Params.ProgPaths._PathToLazarusConf:=XMLConfig.GetValue('PathToLazarusConf',Params.ProgPaths._PathToLazarusConf);
+      Params.ProgPaths._Temp:=XMLConfig.GetValue('Temp',Params.ProgPaths._Temp);
+    XMLConfig.CloseKey;
+
+    XMLConfig.OpenKey('Behavior');
+      Params.Behavior.AutoSelectPages:=XMLConfig.GetValue('AutoSelectPages',Params.Behavior.AutoSelectPages);
+      Params.Behavior.AutoClearPages:=XMLConfig.GetValue('AutoClearPages',Params.Behavior.AutoClearPages);
+    XMLConfig.CloseKey;
+
+    XMLConfig.OpenKey('Logger');
+      Params.Logger.ScanerMessages:=XMLConfig.GetValue('ScanerMessages',Params.Logger.ScanerMessages);
+      Params.Logger.ParserMessages:=XMLConfig.GetValue('ParserMessages',Params.Logger.ParserMessages);
+      Params.Logger.Timer:=XMLConfig.GetValue('Timer',Params.Logger.Timer);
+      Params.Logger.Notfounded:=XMLConfig.GetValue('Notfounded',Params.Logger.Notfounded);
+    XMLConfig.CloseKey;
+
+  XMLConfig.CloseKey;
+  FreeAndNil(XMLConfig);
+end;
+
+procedure LoadPrjOpts(xmlfile:string;out Params:TProjectOptions);
+var
+  XMLConfig:TXMLConfig;
+begin
+  Params:=DefaultProjectOptions;
+  XMLConfig:=TXMLConfig.Create(nil);
+  XMLConfig.Filename:=xmlfile;
+
+  XMLConfig.OpenKey('PUDGBProjectOptions');
+
+    XMLConfig.OpenKey('Paths');
+      Params.Paths._File:=XMLConfig.GetValue('File',Params.Paths._File);
+      Params.Paths._Paths:=XMLConfig.GetValue('Paths',Params.Paths._Paths);
+    XMLConfig.CloseKey;
+
+    XMLConfig.OpenKey('ParserOptions');
+      Params.ParserOptions._CompilerOptions:=XMLConfig.GetValue('CompilerOptions',Params.ParserOptions._CompilerOptions);
+      Params.ParserOptions.TargetOS:=XMLConfig.GetValue('TargetOS',Params.ParserOptions.TargetOS);
+      Params.ParserOptions.TargetCPU:=XMLConfig.GetValue('TargetCPU',Params.ParserOptions.TargetCPU);
+    XMLConfig.CloseKey;
+
+    XMLConfig.OpenKey('GraphBulding');
+      XMLConfig.OpenKey('CircularGraphOptions');
+        Params.GraphBulding.CircularGraphOptions.CalcEdgesWeight:=XMLConfig.GetValue('CalcEdgesWeightU',Params.GraphBulding.CircularGraphOptions.CalcEdgesWeight);
+      XMLConfig.CloseKey;
+      XMLConfig.OpenKey('FullGraphOptions');
+        XMLConfig.OpenKey('Clusters');
+          Params.GraphBulding.FullGraphOptions.ClustersOptions.PathClusters:=XMLConfig.GetValue('PathClusters',Params.GraphBulding.FullGraphOptions.ClustersOptions.PathClusters);
+          Params.GraphBulding.FullGraphOptions.ClustersOptions.CollapseClusters:=XMLConfig.GetValue('CollapseClusters',Params.GraphBulding.FullGraphOptions.ClustersOptions.CollapseClusters);
+          Params.GraphBulding.FullGraphOptions.ClustersOptions.ExpandClusters:=XMLConfig.GetValue('ExpandClusters',Params.GraphBulding.FullGraphOptions.ClustersOptions.ExpandClusters);
+          Params.GraphBulding.FullGraphOptions.ClustersOptions.LabelClustersEdges:=XMLConfig.GetValue('LabelClustersEdges',Params.GraphBulding.FullGraphOptions.ClustersOptions.LabelClustersEdges);
+        XMLConfig.CloseKey;
+        Params.GraphBulding.FullGraphOptions.IncludeNotFoundedUnits:=XMLConfig.GetValue('IncludeNotFoundedUnits',Params.GraphBulding.FullGraphOptions.IncludeNotFoundedUnits);
+        Params.GraphBulding.FullGraphOptions.IncludeInterfaceUses:=XMLConfig.GetValue('IncludeInterfaceUses',Params.GraphBulding.FullGraphOptions.IncludeInterfaceUses);
+        Params.GraphBulding.FullGraphOptions.IncludeImplementationUses:=XMLConfig.GetValue('IncludeImplementationUses',Params.GraphBulding.FullGraphOptions.IncludeImplementationUses);
+        Params.GraphBulding.FullGraphOptions.IncludeOnlyCircularLoops:=XMLConfig.GetValue('IncludeOnlyCircularLoops',Params.GraphBulding.FullGraphOptions.IncludeOnlyCircularLoops);
+        Params.GraphBulding.FullGraphOptions.IncludeToGraph:=XMLConfig.GetValue('IncludeToGraph',Params.GraphBulding.FullGraphOptions.IncludeToGraph);
+        Params.GraphBulding.FullGraphOptions.ExcludeFromGraph:=XMLConfig.GetValue('ExcludeFromGraph',Params.GraphBulding.FullGraphOptions.ExcludeFromGraph);
+        Params.GraphBulding.FullGraphOptions.OnlyDirectlyUses:=XMLConfig.GetValue('OnlyDirectlyUses',Params.GraphBulding.FullGraphOptions.OnlyDirectlyUses);
+        Params.GraphBulding.FullGraphOptions.DstUnit:=XMLConfig.GetValue('DstUnit',Params.GraphBulding.FullGraphOptions.DstUnit);
+        Params.GraphBulding.FullGraphOptions.SrcUnit:=XMLConfig.GetValue('SrcUnit',Params.GraphBulding.FullGraphOptions.SrcUnit);
+      XMLConfig.CloseKey;
+      Params.GraphBulding.InterfaceUsesEdgeType:=String2EdgeType(XMLConfig.GetValue('InterfaceUsesEdgeType',EdgeType2String(Params.GraphBulding.InterfaceUsesEdgeType)));
+      Params.GraphBulding.ImplementationUsesEdgeType:=String2EdgeType(XMLConfig.GetValue('ImplementationUsesEdgeType',EdgeType2String(Params.GraphBulding.ImplementationUsesEdgeType)));
+    XMLConfig.CloseKey;
+
+  XMLConfig.CloseKey;
+  FreeAndNil(XMLConfig);
+end;
+
 procedure TForm1._onCreate(Sender: TObject);
 begin
-   Options.ProjectOptions:=DefaultProjectOptions;
+  //setup default ProjectOptions
+  //Options.ProjectOptions:=DefaultProjectOptions;
+  LoadPrjOpts(ExtractFileDir(ParamStr(0))+pathdelim+'default.prjxml',Options.ProjectOptions);
+
+  //setup default ProgramOptions
+  //Options.ProgramOptions:=DefaultProgramOptions;
+  LoadPrgOpts(ExtractFileDir(ParamStr(0))+pathdelim+'default.prgxml',Options.ProgramOptions);
+
    UnitsFormat:=CreateDefaultUnitsFormat;
    INTFObjInspShowOnlyHotFastEditors:=false;
 
@@ -158,9 +247,6 @@ begin
 
    //register TProgramOptions in zscript unit
    RunTimeUnit^.RegisterType(TypeInfo(TProgramOptions));
-
-   //setup default ProgramOptions
-   Options.ProgramOptions:=DefaultProgramOptions;
 
    //register TProjectOptions in zscript unit
    RunTimeUnit^.RegisterType(TypeInfo(TProjectOptions));
@@ -185,13 +271,6 @@ begin
                                               'Directly uses','Dest unit','Source unit']);
 
    RunTimeUnit^.SetTypeDesk(TypeInfo(TEdgeType),['Continuous','Dotted']);
-
-   //setup default ProjectOptions
-   Options.ProjectOptions.Paths._File:=ExtractFileDir(ParamStr(0))+pathdelim+'passrcerrors.pas';
-   Options.ProjectOptions.Paths._Paths:=ExtractFileDir(ParamStr(0));
-
-   Options.ProjectOptions.GraphBulding.FullGraphOptions.IncludeToGraph:='';
-   Options.ProjectOptions.GraphBulding.FullGraphOptions.ExcludeFromGraph:='';
 
    //Add standart and 'fast' editors for types showed in object inspector
    AddEditorToType(RunTimeUnit^.TypeName2PTD('Integer'),TBaseTypesEditors.BaseCreateEditor);//register standart editor to integer type
@@ -295,38 +374,6 @@ begin
  close;
 end;
 
-procedure LoadPrgOpts(xmlfile:string;out Params:TProgramOptions);
-var
-  XMLConfig:TXMLConfig;
-begin
-  Params:=DefaultProgramOptions;
-  XMLConfig:=TXMLConfig.Create(nil);
-  XMLConfig.Filename:=xmlfile;
-
-  XMLConfig.OpenKey('PUDGBProgramOptions');
-
-    XMLConfig.OpenKey('Paths');
-      Params.ProgPaths._PathToDot:=XMLConfig.GetValue('PathToDot',Params.ProgPaths._PathToDot);
-      Params.ProgPaths._PathToLazarusConf:=XMLConfig.GetValue('PathToLazarusConf',Params.ProgPaths._PathToLazarusConf);
-      Params.ProgPaths._Temp:=XMLConfig.GetValue('Temp',Params.ProgPaths._Temp);
-    XMLConfig.CloseKey;
-
-    XMLConfig.OpenKey('Behavior');
-      Params.Behavior.AutoSelectPages:=XMLConfig.GetValue('AutoSelectPages',Params.Behavior.AutoSelectPages);
-      Params.Behavior.AutoClearPages:=XMLConfig.GetValue('AutoClearPages',Params.Behavior.AutoClearPages);
-    XMLConfig.CloseKey;
-
-    XMLConfig.OpenKey('Logger');
-      Params.Logger.ScanerMessages:=XMLConfig.GetValue('ScanerMessages',Params.Logger.ScanerMessages);
-      Params.Logger.ParserMessages:=XMLConfig.GetValue('ParserMessages',Params.Logger.ParserMessages);
-      Params.Logger.Timer:=XMLConfig.GetValue('Timer',Params.Logger.Timer);
-      Params.Logger.Notfounded:=XMLConfig.GetValue('Notfounded',Params.Logger.Notfounded);
-    XMLConfig.CloseKey;
-
-  XMLConfig.CloseKey;
-  FreeAndNil(XMLConfig);
-end;
-
 procedure TForm1._PrgOptsLoad(Sender: TObject);
 var
   od:TOpenDialog;
@@ -389,7 +436,9 @@ begin
     finally
       Config.Free;
     end;
-    XMLConfig.Flush;
+    //XMLConfig.Flush;
+    if (XMLConfig.FileName<>'') then
+      XMLConfig.SaveToFile(XMLConfig.Filename);
   finally
     XMLConfig.Free;
   end;
@@ -408,56 +457,6 @@ begin
    if sd.Execute then
      SavePrgOpts(sd.FileName,Options.ProgramOptions);
    sd.Free;
-end;
-
-procedure LoadPrjOpts(xmlfile:string;out Params:TProjectOptions);
-var
-  XMLConfig:TXMLConfig;
-begin
-  Params:=DefaultProjectOptions;
-  XMLConfig:=TXMLConfig.Create(nil);
-  XMLConfig.Filename:=xmlfile;
-
-  XMLConfig.OpenKey('PUDGBProjectOptions');
-
-    XMLConfig.OpenKey('Paths');
-      Params.Paths._File:=XMLConfig.GetValue('File',Params.Paths._File);
-      Params.Paths._Paths:=XMLConfig.GetValue('Paths',Params.Paths._Paths);
-    XMLConfig.CloseKey;
-
-    XMLConfig.OpenKey('ParserOptions');
-      Params.ParserOptions._CompilerOptions:=XMLConfig.GetValue('CompilerOptions',Params.ParserOptions._CompilerOptions);
-      Params.ParserOptions.TargetOS:=XMLConfig.GetValue('TargetOS',Params.ParserOptions.TargetOS);
-      Params.ParserOptions.TargetCPU:=XMLConfig.GetValue('TargetCPU',Params.ParserOptions.TargetCPU);
-    XMLConfig.CloseKey;
-
-    XMLConfig.OpenKey('GraphBulding');
-      XMLConfig.OpenKey('CircularGraphOptions');
-        Params.GraphBulding.CircularGraphOptions.CalcEdgesWeight:=XMLConfig.GetValue('CalcEdgesWeightU',Params.GraphBulding.CircularGraphOptions.CalcEdgesWeight);
-      XMLConfig.CloseKey;
-      XMLConfig.OpenKey('FullGraphOptions');
-        XMLConfig.OpenKey('Clusters');
-          Params.GraphBulding.FullGraphOptions.ClustersOptions.PathClusters:=XMLConfig.GetValue('PathClusters',Params.GraphBulding.FullGraphOptions.ClustersOptions.PathClusters);
-          Params.GraphBulding.FullGraphOptions.ClustersOptions.CollapseClusters:=XMLConfig.GetValue('CollapseClusters',Params.GraphBulding.FullGraphOptions.ClustersOptions.CollapseClusters);
-          Params.GraphBulding.FullGraphOptions.ClustersOptions.ExpandClusters:=XMLConfig.GetValue('ExpandClusters',Params.GraphBulding.FullGraphOptions.ClustersOptions.ExpandClusters);
-          Params.GraphBulding.FullGraphOptions.ClustersOptions.LabelClustersEdges:=XMLConfig.GetValue('LabelClustersEdges',Params.GraphBulding.FullGraphOptions.ClustersOptions.LabelClustersEdges);
-        XMLConfig.CloseKey;
-        Params.GraphBulding.FullGraphOptions.IncludeNotFoundedUnits:=XMLConfig.GetValue('IncludeNotFoundedUnits',Params.GraphBulding.FullGraphOptions.IncludeNotFoundedUnits);
-        Params.GraphBulding.FullGraphOptions.IncludeInterfaceUses:=XMLConfig.GetValue('IncludeInterfaceUses',Params.GraphBulding.FullGraphOptions.IncludeInterfaceUses);
-        Params.GraphBulding.FullGraphOptions.IncludeImplementationUses:=XMLConfig.GetValue('IncludeImplementationUses',Params.GraphBulding.FullGraphOptions.IncludeImplementationUses);
-        Params.GraphBulding.FullGraphOptions.IncludeOnlyCircularLoops:=XMLConfig.GetValue('IncludeOnlyCircularLoops',Params.GraphBulding.FullGraphOptions.IncludeOnlyCircularLoops);
-        Params.GraphBulding.FullGraphOptions.IncludeToGraph:=XMLConfig.GetValue('IncludeToGraph',Params.GraphBulding.FullGraphOptions.IncludeToGraph);
-        Params.GraphBulding.FullGraphOptions.ExcludeFromGraph:=XMLConfig.GetValue('ExcludeFromGraph',Params.GraphBulding.FullGraphOptions.ExcludeFromGraph);
-        Params.GraphBulding.FullGraphOptions.OnlyDirectlyUses:=XMLConfig.GetValue('OnlyDirectlyUses',Params.GraphBulding.FullGraphOptions.OnlyDirectlyUses);
-        Params.GraphBulding.FullGraphOptions.DstUnit:=XMLConfig.GetValue('DstUnit',Params.GraphBulding.FullGraphOptions.DstUnit);
-        Params.GraphBulding.FullGraphOptions.SrcUnit:=XMLConfig.GetValue('SrcUnit',Params.GraphBulding.FullGraphOptions.SrcUnit);
-      XMLConfig.CloseKey;
-      Params.GraphBulding.InterfaceUsesEdgeType:=String2EdgeType(XMLConfig.GetValue('InterfaceUsesEdgeType',EdgeType2String(Params.GraphBulding.InterfaceUsesEdgeType)));
-      Params.GraphBulding.ImplementationUsesEdgeType:=String2EdgeType(XMLConfig.GetValue('ImplementationUsesEdgeType',EdgeType2String(Params.GraphBulding.ImplementationUsesEdgeType)));
-    XMLConfig.CloseKey;
-
-  XMLConfig.CloseKey;
-  FreeAndNil(XMLConfig);
 end;
 
 procedure TForm1._PrjOptsLoad(Sender: TObject);
@@ -538,7 +537,9 @@ begin
     finally
       Config.Free;
     end;
-    XMLConfig.Flush;
+    //XMLConfig.Flush;
+    if (XMLConfig.FileName<>'') then
+      XMLConfig.SaveToFile(XMLConfig.Filename);
   finally
     XMLConfig.Free;
   end;

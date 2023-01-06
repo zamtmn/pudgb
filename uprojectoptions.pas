@@ -110,25 +110,28 @@ end;
 
 function DefaultProjectOptions:TProjectOptions;
 begin
- result.Paths._File:='?? import or edit this';
- result.Paths._Paths:='?? import or edit this';
+  result.Paths._File:=ExtractFileDir(ParamStr(0))+pathdelim+'passrcerrors.pas';
+  result.Paths._Paths:=ExtractFileDir(ParamStr(0));
 
- result.ParserOptions._CompilerOptions:='-Sc '+GetCompilerDefs;
- result.ParserOptions.TargetOS:={$I %FPCTARGETOS%};
- result.ParserOptions.TargetCPU:={$I %FPCTARGETCPU%};
 
- result.GraphBulding.FullGraphOptions.IncludeNotFoundedUnits:=false;
- result.GraphBulding.FullGraphOptions.IncludeInterfaceUses:=true;
- result.GraphBulding.InterfaceUsesEdgeType:=ETContinuous;
- result.GraphBulding.FullGraphOptions.IncludeImplementationUses:=true;
- result.GraphBulding.ImplementationUsesEdgeType:=ETDotted;
- result.GraphBulding.FullGraphOptions.ClustersOptions.PathClusters:=true;
- result.GraphBulding.FullGraphOptions.ClustersOptions.CollapseClusters:='';
- result.GraphBulding.FullGraphOptions.ClustersOptions.ExpandClusters:='';
- result.GraphBulding.FullGraphOptions.ClustersOptions.LabelClustersEdges:=false;
- result.GraphBulding.FullGraphOptions.IncludeOnlyCircularLoops:=false;
- result.GraphBulding.FullGraphOptions.OnlyDirectlyUses:=false;
- result.GraphBulding.CircularGraphOptions.CalcEdgesWeight:=false;
+  result.ParserOptions._CompilerOptions:='-Sc '+GetCompilerDefs;
+  result.ParserOptions.TargetOS:={$I %FPCTARGETOS%};
+  result.ParserOptions.TargetCPU:={$I %FPCTARGETCPU%};
+
+  result.GraphBulding.FullGraphOptions.IncludeToGraph:='';
+  result.GraphBulding.FullGraphOptions.ExcludeFromGraph:='';
+  result.GraphBulding.FullGraphOptions.IncludeNotFoundedUnits:=false;
+  result.GraphBulding.FullGraphOptions.IncludeInterfaceUses:=true;
+  result.GraphBulding.InterfaceUsesEdgeType:=ETContinuous;
+  result.GraphBulding.FullGraphOptions.IncludeImplementationUses:=true;
+  result.GraphBulding.ImplementationUsesEdgeType:=ETDotted;
+  result.GraphBulding.FullGraphOptions.ClustersOptions.PathClusters:=true;
+  result.GraphBulding.FullGraphOptions.ClustersOptions.CollapseClusters:='';
+  result.GraphBulding.FullGraphOptions.ClustersOptions.ExpandClusters:='';
+  result.GraphBulding.FullGraphOptions.ClustersOptions.LabelClustersEdges:=false;
+  result.GraphBulding.FullGraphOptions.IncludeOnlyCircularLoops:=false;
+  result.GraphBulding.FullGraphOptions.OnlyDirectlyUses:=false;
+  result.GraphBulding.CircularGraphOptions.CalcEdgesWeight:=false;
 end;
 
 end.
