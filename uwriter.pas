@@ -144,7 +144,17 @@ begin
   end;
 end;
 
-procedure WriteNode(var Node:TUnitInfo;const index:integer;const LogWriter:TLogWriter;const LogOpt:TLogOpt);
+procedure WriteNode(_DstUnitIndex,_SrctUnitIndex:TNodeIndexes;var Node:TUnitInfo;const index:integer;const LogWriter:TLogWriter;const LogOpt:TLogOpt);
+function find(UnitIndexs:TNodeIndexes;const value:integer):boolean;
+var
+  i:integer;
+begin
+  if assigned(UnitIndexs) then
+    for i in UnitIndexs do
+      if i=index then
+        exit(true);
+  result:=false;
+end;
 begin
   if node.NodeState=NSChecedNotWrited then
   begin
@@ -152,6 +162,10 @@ begin
       LogWriter(format(' %s [shape=box]',[getDecoratedUnnitname(Node)]),LogOpt);
     if (Node.UnitPath='')and(index<>0) then
       LogWriter(format(' %s [style=dashed]',[getDecoratedUnnitname(Node)]),LogOpt);
+    if find(_DstUnitIndex,index) then
+      LogWriter(format(' %s [color=red, style=filled]',[getDecoratedUnnitname(Node)]),LogOpt)
+    else if find(_SrctUnitIndex,index) then
+      LogWriter(format(' %s [color=green, style=filled]',[getDecoratedUnnitname(Node)]),LogOpt);
     node.NodeState:=NSCheced
   end;
 end;
@@ -159,7 +173,7 @@ end;
 procedure ProcessNode(_SourceUnitIndex,_DestUnitIndex:TNodeIndexes;Options:TProjectOptions;ScanResult:TScanResult;var Node:TUnitInfo;const index:integer;const LogWriter:TLogWriter;const LogOpt:TLogOpt;ForceInclude:boolean=false);
 begin
   CheckNode(_SourceUnitIndex,_DestUnitIndex,Options,ScanResult,Node,index,LogWriter,LogOpt,ForceInclude);
-  WriteNode(Node,index,LogWriter,LogOpt);
+  WriteNode(_SourceUnitIndex,_DestUnitIndex,Node,index,LogWriter,LogOpt);
 end;
 
 procedure TLinkCounter.addlink(ln:string);
