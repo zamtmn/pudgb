@@ -1,10 +1,8 @@
-	{$mode objfpc}
-unit test;
-interface
-const
-  Platform = {$if defined(cpu32)} 'x86'
-             {$elseif defined(cpu64)} 'x64'
-             {$else} {$error unknown platform} {$endif};
-
-implementation
+program test008;
+uses
+  Variants;
+var
+  ExcelWorkbook: OleVariant;
+begin
+  ExcelWorkbook.SaveAs(FileName:='test',AccessMode:=3,ConflictResolution:=2);
 end.

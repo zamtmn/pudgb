@@ -10,7 +10,8 @@ uses
   LazUTF8,Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
   ComCtrls, StdCtrls, ActnList, Menus, LCLIntf, Process,
 
-  zcobjectinspectorui,uzctypesdecorations,uzedimensionaltypes,zcobjectinspector,Varman,uzbtypes,uzemathutils,UUnitManager,varmandef,zcobjectinspectoreditors,UEnumDescriptor,
+  zcobjectinspectorui,uzObjectInspectorManager,uzctypesdecorations,uzbUnits,zcobjectinspector,Varman,
+  uzbtypes,uzbUnitsUtils,UUnitManager,varmandef,zcobjectinspectoreditors,UEnumDescriptor,
 
   XMLConf,XMLPropStorage,LazConfigStorage,
 
@@ -234,13 +235,13 @@ begin
   LoadPrgOpts(ExtractFileDir(ParamStr(0))+pathdelim+'default.prgxml',Options.ProgramOptions);
 
    UnitsFormat:=CreateDefaultUnitsFormat;
-   INTFObjInspShowOnlyHotFastEditors:=false;
+   OIManager.INTFObjInspShowOnlyHotFastEditors:=false;
 
    with TComboBox.Create(NIL) do begin
      ParentWindow:=self.Handle;
      Hide;
      Application.ProcessMessages;
-     INTFDefaultControlHeight:=Height;
+     OIManager.DefaultRowHeight:=Height;
    end;
 
    RunTimeUnit:=units.CreateUnit('',nil,'RunTimeUnit');//create empty zscript unit
@@ -285,8 +286,7 @@ begin
    RunTimeUnit^.RegisterType(TypeInfo(TOptions));
    RunTimeUnit^.SetTypeDesk(TypeInfo(TOptions),['Program options','Project options']);
    RunTimeUnit^.SetTypeDesk(TypeInfo(TLogger),['Scaner messages','Parser messages','Timer','Not founded units']);
-
-   GDBobjinsp1.setptr(nil,UnitsFormat,RunTimeUnit^.TypeName2PTD('TOptions'),@Options,nil);//show data variable in inspector
+   GDBobjinsp1.setptr(TDisplayedData.CreateRec(@Options,RunTimeUnit^.TypeName2PTD('TOptions'),nil,UnitsFormat));//show data variable in inspector
    caption:='pudgb v 0.99 rev:'+RevisionStr;
 end;
 

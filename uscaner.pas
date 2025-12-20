@@ -9,6 +9,7 @@ uses
   PScanner, PParser, PasTree, Masks;
 
 type
+  TRawByteStringArray = Array of RawByteString;
     TSimpleEngine = class(TPasTreeContainer)
     private
     uname:string;
@@ -110,6 +111,236 @@ function MemoryUsed: Cardinal;
  begin
    Result := GetFPCHeapStatus.CurrHeapUsed;
 end;
+
+//копипаста из PParser
+//сделана из-за отсутствия возможности
+//установить po_IgnoreUnknownResource для сканера
+function myParseSource(AEngine: TPasTreeContainer;
+                     const FPCCommandLine : Array of String;
+                     OSTarget, CPUTarget: String;
+                     Options : TParseSourceOptions): TPasModule;
+
+var
+  FileResolver: TBaseFileResolver;
+  Parser: TPasParser;
+  Filename: String;
+  Scanner: TPascalScanner;
+
+  procedure ProcessCmdLinePart(S : String);
+  var
+    l,Len: Integer;
+
+  begin
+    if (S='') then
+      exit;
+    Len:=Length(S);
+    if (s[1] = '-') and (len>1) then
+    begin
+      case s[2] of
+        'd': // -d define
+          Scanner.AddDefine(UpperCase(Copy(s, 3, Len)));
+        'u': // -u undefine
+          Scanner.RemoveDefine(UpperCase(Copy(s, 3, Len)));
+        'F': // -F
+          if (len>2) and (s[3] = 'i') then // -Fi include path
+            FileResolver.AddIncludePath(Copy(s, 4, Len));
+        'I': // -I include path
+          FileResolver.AddIncludePath(Copy(s, 3, Len));
+        'S': // -S mode
+          if  (len>2) then
+            begin
+            l:=3;
+            While L<=Len do
+              begin
+              case S[l] of
+                'c' : Scanner.Options:=Scanner.Options+[po_cassignments];
+                'd' : Scanner.SetCompilerMode('DELPHI');
+                '2' : Scanner.SetCompilerMode('OBJFPC');
+                'h' : ; // do nothing
+              end;
+              inc(l);
+              end;
+            end;
+        'M' :
+           begin
+           delete(S,1,2);
+           Scanner.SetCompilerMode(S);
+           end;
+      end;
+    end else
+      if Filename <> '' then
+        raise ENotSupportedException.Create(SErrMultipleSourceFiles)
+      else
+        Filename := s;
+  end;
+
+var
+  S: String;
+
+begin
+  if DefaultFileResolverClass=Nil then
+    raise ENotImplemented.Create(SErrFileSystemNotSupported);
+  Result := nil;
+  FileResolver := nil;
+  Scanner := nil;
+  Parser := nil;
+  try
+    FileResolver := DefaultFileResolverClass.Create;
+    {$ifdef HasStreams}
+    if FileResolver is TFileResolver then
+      TFileResolver(FileResolver).UseStreams:=poUseStreams in Options;
+    {$endif}
+    Scanner := TPascalScanner.Create(FileResolver);
+    Scanner.LogEvents:=AEngine.ScannerLogEvents;
+    Scanner.OnLog:=AEngine.OnLog;
+    if not (poSkipDefaultDefs in Options) then
+      begin
+      Scanner.AddDefine('FPK');
+      Scanner.AddDefine('FPC');
+      // TargetOS
+      s := UpperCase(OSTarget);
+      Scanner.AddDefine(s);
+      Case s of
+        'LINUX' : Scanner.AddDefine('UNIX');
+        'FREEBSD' :
+          begin
+          Scanner.AddDefine('BSD');
+          Scanner.AddDefine('UNIX');
+          end;
+        'NETBSD' :
+          begin
+          Scanner.AddDefine('BSD');
+          Scanner.AddDefine('UNIX');
+          end;
+        'SUNOS' :
+          begin
+          Scanner.AddDefine('SOLARIS');
+          Scanner.AddDefine('UNIX');
+          end;
+        'GO32V2' : Scanner.AddDefine('DPMI');
+        'BEOS' : Scanner.AddDefine('UNIX');
+        'QNX' : Scanner.AddDefine('UNIX');
+        'AROS' : Scanner.AddDefine('HASAMIGA');
+        'MORPHOS' : Scanner.AddDefine('HASAMIGA');
+        'AMIGA' : Scanner.AddDefine('HASAMIGA');
+      end;
+      // TargetCPU
+      s := UpperCase(CPUTarget);
+      Scanner.AddDefine('CPU'+s);
+      if (s='X86_64') then
+        Scanner.AddDefine('CPU64')
+      else
+        Scanner.AddDefine('CPU32');
+      end;
+    Scanner.Options:=Scanner.Options+[po_IgnoreUnknownResource];
+    Parser := TPasParser.Create(Scanner, FileResolver, AEngine);
+    if (poSkipDefaultDefs in Options) then
+      Parser.ImplicitUses.Clear;
+    Filename := '';
+    Parser.LogEvents:=AEngine.ParserLogEvents;
+    Parser.OnLog:=AEngine.OnLog;
+
+    For S in FPCCommandLine do
+      ProcessCmdLinePart(S);
+    if Filename = '' then
+      raise Exception.Create(SErrNoSourceGiven);
+{$IFDEF HASFS}
+    FileResolver.AddIncludePath(ExtractFilePath(FileName));
+{$ENDIF}
+    Scanner.OpenFile(Filename);
+    Parser.ParseMain(Result);
+  finally
+    Parser.Free;
+    Scanner.Free;
+    FileResolver.Free;
+  end;
+end;
+
+Function mySplitCommandLine(S : RawByteString) : TRawByteStringArray;
+
+  Function GetNextWord : RawByteString;
+
+  Const
+    WhiteSpace = [' ',#9,#10,#13];
+    Literals = ['"',''''];
+
+  Var
+    Wstart,wend : Integer;
+    InLiteral : Boolean;
+    LastLiteral : AnsiChar;
+
+    Procedure AppendToResult;
+
+    begin
+      Result:=Result+Copy(S,WStart,WEnd-WStart);
+      WStart:=Wend+1;
+    end;
+
+  begin
+    Result:='';
+    WStart:=1;
+    While (WStart<=Length(S)) and charinset(S[WStart],WhiteSpace) do
+      Inc(WStart);
+    WEnd:=WStart;
+    InLiteral:=False;
+    LastLiteral:=#0;
+    While (Wend<=Length(S)) and (Not charinset(S[Wend],WhiteSpace) or InLiteral) do
+      begin
+      if charinset(S[Wend],Literals) then
+        If InLiteral then
+          begin
+          InLiteral:=Not (S[Wend]=LastLiteral);
+          if not InLiteral then
+            AppendToResult;
+          end
+        else
+          begin
+          InLiteral:=True;
+          LastLiteral:=S[Wend];
+          AppendToResult;
+          end;
+       inc(wend);
+       end;
+     AppendToResult;
+     While (WEnd<=Length(S)) and (S[Wend] in WhiteSpace) do
+       inc(Wend);
+     Delete(S,1,WEnd-1);
+  end;
+
+Var
+  W : RawByteString;
+  len : Integer;
+
+begin
+  Len:=0;
+  Result:=Default(TRawByteStringArray);
+  SetLength(Result,(Length(S) div 2)+1);
+  While Length(S)>0 do
+    begin
+    W:=GetNextWord;
+    If (W<>'') then
+      begin
+      Result[Len]:=W;
+      Inc(Len);
+      end;
+    end;
+  SetLength(Result,Len);
+end;
+
+
+function myParseSource(AEngine: TPasTreeContainer;
+  const FPCCommandLine, OSTarget, CPUTarget: String;
+  Options : TParseSourceOptions): TPasModule;
+
+Var
+  Args : TStringArray;
+
+begin
+  Args:=mySplitCommandLine(FPCCommandLine);
+  Result:=myParseSource(aEngine,Args,OSTarget,CPUTarget,Options);
+end;
+
+
 procedure ScanModule(mn:String;Options:TOptions;ScanResult:TScanResult;const LogWriter:TLogWriter);
 var
   M:TPasModule;
@@ -128,7 +359,7 @@ begin
       end;
      if E.uname='/media/zamtmn/apps/zcad/other/pudgb//uchecker.pas' then
        E.uname:=E.uname;
-     M := ParseSource(E,mn+' '+Options.ProjectOptions.ParserOptions._CompilerOptions,Options.ProjectOptions.ParserOptions.TargetOS,Options.ProjectOptions.ParserOptions.TargetCPU,[poSkipDefaultDefs]);
+     M := myParseSource(E,mn+' '+Options.ProjectOptions.ParserOptions._CompilerOptions,Options.ProjectOptions.ParserOptions.TargetOS,Options.ProjectOptions.ParserOptions.TargetCPU,[poSkipDefaultDefs]);
      if Options.ProgramOptions.Logger.Timer then
       begin
        LogWriter(format('Parse "%s" %fsec, %db',[mn,(now-myTime)*10e4,(MemoryUsed-memused)]),[LD_Report]);
