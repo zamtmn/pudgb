@@ -1,0 +1,24 @@
+[submodule "packages/zmacros"]
+	path = packages/zmacros
+	url = https://github.com/zamtmn/zmacros.git
+[submodule "packages/agraphlaz"]
+	path = packages/agraphlaz
+	url = https://github.com/zamtmn/agraphlaz.git
+[submodule "packages/zbaseutils"]
+	path = packages/zbaseutils
+	url = https://github.com/zamtmn/zbaseutils.git
+[submodule "packages/zcontainers"]
+	path = packages/zcontainers
+	url = https://github.com/zamtmn/zcontainers.git
+[submodule "packages/zunits"]
+	path = packages/zunits
+	url = https://github.com/zamtmn/zunits.git
+[submodule "packages/zscriptbase"]
+	path = packages/zscriptbase
+	url = https://github.com/zamtmn/zscriptbase.git
+[submodule "packages/zscript"]
+	path = packages/zscript
+	url = https://github.com/zamtmn/zscript.git
+[submodule "packages/zobjectinspector"]
+	path = packages/zobjectinspector
+	url = https://github.com/zamtmn/zobjectinspector.git

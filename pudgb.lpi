@@ -34,37 +34,49 @@
         <Mode0 Name="default"/>
       </Modes>
     </RunParams>
-    <RequiredPackages Count="10">
+    <RequiredPackages Count="14">
       <Item1>
-        <PackageName Value="zunits"/>
+        <PackageName Value="zmacros"/>
       </Item1>
       <Item2>
-        <PackageName Value="IdeConfig"/>
+        <PackageName Value="zbaseutils"/>
       </Item2>
       <Item3>
-        <PackageName Value="LazOpenGLContext"/>
+        <PackageName Value="zscript"/>
       </Item3>
       <Item4>
-        <PackageName Value="ag_graph"/>
+        <PackageName Value="zscriptbase"/>
       </Item4>
       <Item5>
-        <PackageName Value="ag_vectors"/>
+        <PackageName Value="zunits"/>
       </Item5>
       <Item6>
-        <PackageName Value="CodeTools"/>
+        <PackageName Value="zobjectinspector"/>
       </Item6>
       <Item7>
-        <PackageName Value="IDEIntf"/>
+        <PackageName Value="ag_graph"/>
       </Item7>
       <Item8>
-        <PackageName Value="zobjectinspector"/>
+        <PackageName Value="ag_vectors"/>
       </Item8>
       <Item9>
-        <PackageName Value="FCL"/>
+        <PackageName Value="IdeConfig"/>
       </Item9>
       <Item10>
-        <PackageName Value="LCL"/>
+        <PackageName Value="IDEIntf"/>
       </Item10>
+      <Item11>
+        <PackageName Value="CodeTools"/>
+      </Item11>
+      <Item12>
+        <PackageName Value="LazOpenGLContext"/>
+      </Item12>
+      <Item13>
+        <PackageName Value="FCL"/>
+      </Item13>
+      <Item14>
+        <PackageName Value="LCL"/>
+      </Item14>
     </RequiredPackages>
     <Units Count="11">
       <Unit0>

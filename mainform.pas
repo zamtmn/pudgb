@@ -10,8 +10,8 @@ uses
   LazUTF8,Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ExtCtrls,
   ComCtrls, StdCtrls, ActnList, Menus, LCLIntf, Process,
 
-  zcobjectinspectorui,uzObjectInspectorManager,uzctypesdecorations,uzbUnits,zcobjectinspector,Varman,
-  uzbtypes,uzbUnitsUtils,UUnitManager,varmandef,zcobjectinspectoreditors,UEnumDescriptor,
+  uzOIUI,uzObjectInspectorManager,uzOIDecorations,uzbUnits,uzObjectInspector,Varman,
+  uzbUnitsUtils,UUnitManager,uzsbVarmanDef,uzOIEditors,UEnumDescriptor,
 
   XMLConf,XMLPropStorage,LazConfigStorage,
 
