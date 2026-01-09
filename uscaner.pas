@@ -9,24 +9,26 @@ uses
   PScanner, PParser, PasTree, Masks;
 
 type
-  TRawByteStringArray = Array of RawByteString;
-    TSimpleEngine = class(TPasTreeContainer)
-    private
+  TRawByteStringArray=array of rawbytestring;
+
+  TSimpleEngine=class(TPasTreeContainer)
+  private
     uname:string;
-    public
+  public
     LogWriter:TLogWriter;
 
     constructor Create(const Options:TOptions;const _LogWriter:TLogWriter);
     destructor Destroy;override;
-    Procedure Log(Sender : TObject; Const Msg : String);
+    procedure Log(Sender:TObject;const Msg:string);
 
-    function CreateElement(AClass: TPTreeElement; const AName: String;
-      AParent: TPasElement; AVisibility: TPasMemberVisibility;
-      const ASourceFilename: String; ASourceLinenumber: Integer): TPasElement;
+    function CreateElement(AClass:TPTreeElement;const AName:string;
+      AParent:TPasElement;AVisibility:TPasMemberVisibility;
+      const ASourceFilename:string;ASourceLinenumber:integer):TPasElement;
       override;
-    function FindElement(const AName: String): TPasElement; override;
-    end;
-    TPrepareMode = (PMProgram,PMInterface,PMImplementation);
+    function FindElement(const AName:string):TPasElement;override;
+  end;
+
+  TPrepareMode=(PMProgram,PMInterface,PMImplementation);
 
 procedure GetDecls(PM:TPrepareMode;Decl:TPasDeclarations;Options:TOptions;ScanResult:TScanResult;UnitIndex:TUnitIndex;const LogWriter:TLogWriter);
 procedure ScanModule(mn:String;Options:TOptions;ScanResult:TScanResult;const LogWriter:TLogWriter);
@@ -39,8 +41,7 @@ begin
   LogWriter(format('unit(%s).Destroy',[uname]),[]);
   if uname='other/uniqueinstance/uniqueinstancebase.pas'{'zengine\core\uzeentityfactory.pas'}{'zengine\core\objects\uzeentitiestree.pas'} then
     uname:=uname;
-  if assigned(FPackage) then
-    FPackage.Destroy;
+  FPackage.free;
   inherited;
 end;
 
@@ -55,6 +56,7 @@ begin
 end;
 constructor TSimpleEngine.Create(const Options:TOptions;const _LogWriter:TLogWriter);
 begin
+  inherited create();
   if Options.ProgramOptions.Logger.ScanerMessages then
     ScannerLogEvents:=[sleFile,sleLineNumber,sleConditionals,sleDirective];
   if Options.ProgramOptions.Logger.ParserMessages then
@@ -72,7 +74,7 @@ begin
   { dummy implementation, see TFPDocEngine.FindElement for a real example }
   Result := nil;
 end;
-procedure PrepareModule(var M:TPasModule;var E:TPasTreeContainer;Options:TOptions;ScanResult:TScanResult;const LogWriter:TLogWriter);
+procedure PrepareModule(var M:TPasModule;var E:TSimpleEngine;Options:TOptions;ScanResult:TScanResult;const LogWriter:TLogWriter);
 var
    UnitIndex:TUnitIndex;
    s:string;
@@ -369,9 +371,9 @@ begin
      if E.uname='zengine\core\uzeentityfactory.pas' then
        E.uname:=E.uname;
      E.LogWriter:=LogWriter;
-     PrepareModule(M,TPasTreeContainer(E),Options,ScanResult,LogWriter);
-     if assigned(M) then M.Destroy;
-     if assigned(E) then E.Free;
+     PrepareModule(M,E,Options,ScanResult,LogWriter);
+     M.Free;
+     E.Free;
    except
      on excep:EParserError do
        begin

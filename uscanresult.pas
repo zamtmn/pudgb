@@ -99,10 +99,9 @@ begin
   begin
   //if PasModule.SOURCEFILENAME='zengine\geomlib\uzgeomproxy.pas' then
   //  PasModule:=PasModule;
-  if assigned(PasModule) then
-                             PasModule.Destroy;
-  if assigned(PasTreeContainer) then
-                                    PasTreeContainer.Destroy;
+  PasModule.Free;
+  PasTreeContainer.Free;
+
   UnitName:='';
   UnitPath:='';
   {if assigned(InterfaceUses) then
