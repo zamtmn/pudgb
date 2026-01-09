@@ -216,7 +216,7 @@ begin
            DstUnitIndexs.PushBack(i);
 
     if DstUnitIndexs.size<=0 then
-      Application.MessageBox('Source unit not found in graph','Error!');
+      Application.MessageBox('Destination unit not found in graph','Error!');
   end;
 
   if Options.GraphBulding.FullGraphOptions.SrcUnit<>'' then
@@ -228,7 +228,7 @@ begin
            SrcUnitIndexs.PushBack(i);
 
     if SrcUnitIndexs.size<=0 then
-      Application.MessageBox('Destination unit not found in graph','Error!');
+      Application.MessageBox('Source unit not found in graph','Error!');
   end;
 
   if assigned(LogWriter) then
