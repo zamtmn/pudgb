@@ -286,7 +286,7 @@ begin
    RunTimeUnit^.RegisterType(TypeInfo(TOptions));
    RunTimeUnit^.SetTypeDesk(TypeInfo(TOptions),['Program options','Project options']);
    RunTimeUnit^.SetTypeDesk(TypeInfo(TLogger),['Scaner messages','Parser messages','Timer','Not founded units']);
-   GDBobjinsp1.setptr(TDisplayedData.CreateRec(@Options,RunTimeUnit^.TypeName2PTD('TOptions'),nil,UnitsFormat));//show data variable in inspector
+   GDBobjinsp1.setDisplayedData(TDisplayedData.CreateRec(@Options,RunTimeUnit^.TypeName2PTD('TOptions'),nil,UnitsFormat));//show data variable in inspector
    caption:='pudgb v 0.99 rev:'+RevisionStr;
 end;
 
